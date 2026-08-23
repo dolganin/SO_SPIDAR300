@@ -8,6 +8,6 @@ python sim/tools/gen_urdf.py
 python sim/scripts/convert_urdf_to_usd.py --headless
 ```
 
-- `robot/` contains the CAD/STEP model and assembly references.
+- `robot/` contains the STEP model and assembly references.
 - `sim/` contains the Python package, tools, scripts and simulation assets.
 - `HUB.md` defines where datasets and trained models are published.

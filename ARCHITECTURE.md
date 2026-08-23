@@ -2,11 +2,11 @@
 
 ```text
 spidar300/
-  robot/   editable CAD, STEP and robot documentation
+  robot/   STEP model and robot documentation
   sim/     Isaac Lab package, scripts and USD/URDF assets
   HUB.md   dataset and model publication commands
 arm100/
-  cad/     SO-100 and SO-101 CAD/STEP files
+  robot/   SO-100 and SO-101 STEP files
   media/   reference images
 ```
 
