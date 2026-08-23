@@ -2,7 +2,7 @@
 
 ```text
 spidar300/
-  robot/   STEP model and robot documentation
+  robot/   native CAD source, STEP exports and robot documentation
   sim/     Isaac Lab package, scripts and USD/URDF assets
   HUB.md   dataset and model publication commands
 arm100/
