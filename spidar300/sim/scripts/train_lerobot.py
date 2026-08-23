@@ -10,7 +10,7 @@ from pathlib import Path
 
 _HERE = Path(__file__).resolve().parent
 _ROOT = _HERE.parent
-_PACKAGE_SRC = _ROOT / "source" / "so_spidar300_lab"
+_PACKAGE_SRC = _ROOT
 
 
 def _env() -> dict[str, str]:

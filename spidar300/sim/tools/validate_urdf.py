@@ -8,11 +8,11 @@ import xml.etree.ElementTree as ET
 import numpy as np
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(_HERE, "..", "source", "so_spidar300_lab"))
+sys.path.insert(0, os.path.join(_HERE, ".."))
 from so_spidar300_lab import kinematics as K
 
 URDF = os.path.abspath(os.path.join(
-    _HERE, "..", "source", "so_spidar300_lab", "so_spidar300_lab",
+    _HERE, "..", "so_spidar300_lab",
     "assets", "robot", "so_spidar300.urdf"))
 
 def _rpy(r, p, y):

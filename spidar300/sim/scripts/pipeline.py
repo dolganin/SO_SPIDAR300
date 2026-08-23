@@ -9,7 +9,7 @@ from pathlib import Path
 
 _HERE = Path(__file__).resolve().parent
 _ROOT = _HERE.parent
-_PACKAGE_SRC = _ROOT / "source" / "so_spidar300_lab"
+_PACKAGE_SRC = _ROOT
 
 
 DEFAULT_HDF5 = "./data/so_spidar300_climb.hdf5"

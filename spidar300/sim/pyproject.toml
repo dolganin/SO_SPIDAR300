@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "so_spidar300_lab"
 version = "0.1.0"
 description = "SO-SPIDAR300 hexapod: Isaac Lab climb-to-marker task + teleop + LeRobot pipeline"
-readme = "../../README.md"
+readme = "../README.md"
 requires-python = ">=3.10"
 # Isaac Lab, gymnasium, torch, lerobot and h5py are provided by the Isaac Lab /
 # LeRobot environment — intentionally not pinned here so the extension installs
