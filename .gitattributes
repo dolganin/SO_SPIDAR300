@@ -1,0 +1,12 @@
+# Large editable robot sources stay versioned through Git LFS.
+**/*.CATPart filter=lfs diff=lfs merge=lfs -text
+**/*.CATProduct filter=lfs diff=lfs merge=lfs -text
+**/*.step filter=lfs diff=lfs merge=lfs -text
+**/*.stp filter=lfs diff=lfs merge=lfs -text
+**/*.a3d filter=lfs diff=lfs merge=lfs -text
+**/*.m3d filter=lfs diff=lfs merge=lfs -text
+**/*.x_t filter=lfs diff=lfs merge=lfs -text
+**/*.3mf filter=lfs diff=lfs merge=lfs -text
+**/*.jpg filter=lfs diff=lfs merge=lfs -text
+**/*.jpeg filter=lfs diff=lfs merge=lfs -text
+**/*.webp filter=lfs diff=lfs merge=lfs -text
