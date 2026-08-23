@@ -6,11 +6,11 @@ import sys
 from pathlib import Path
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(_HERE, "..", "source", "so_spidar300_lab"))
+sys.path.insert(0, os.path.join(_HERE, ".."))
 sys.path.insert(0, _HERE)
 
 from so_spidar300_lab import kinematics as K
-_ROBOT_DIR = Path(_HERE).parents[0] / "source" / "so_spidar300_lab" / "so_spidar300_lab" / "assets" / "robot"
+_ROBOT_DIR = Path(_HERE).parents[0] / "so_spidar300_lab" / "assets" / "robot"
 
 MATERIALS = {
     "body": (0.13, 0.13, 0.15, 1.0),

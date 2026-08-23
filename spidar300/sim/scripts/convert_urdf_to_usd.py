@@ -18,7 +18,7 @@ from isaaclab.sim.converters import UrdfConverter, UrdfConverterCfg
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROBOT_DIR = os.path.abspath(os.path.join(
-    _HERE, "..", "source", "so_spidar300_lab", "so_spidar300_lab", "assets", "robot"))
+    _HERE, "..", "so_spidar300_lab", "assets", "robot"))
 URDF = os.path.join(_ROBOT_DIR, "so_spidar300.urdf")
 
 def _structure_and_color(usd_path: str) -> None:
