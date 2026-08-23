@@ -1,0 +1,14 @@
+# Keep source, robot models and code in Git. Keep runtime artifacts in Hub.
+/data/
+/models/
+/outputs/
+/runs/
+/wandb/
+*.hdf5
+*.pt
+*.pth
+*.safetensors
+*.ckpt
+**/.git.legacy/
+__pycache__/
+*.py[cod]
