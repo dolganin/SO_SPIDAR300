@@ -12,3 +12,7 @@
 **/.git.legacy/
 __pycache__/
 *.py[cod]
+*.bak
+*.m3~
+*.a3~
+*.log
