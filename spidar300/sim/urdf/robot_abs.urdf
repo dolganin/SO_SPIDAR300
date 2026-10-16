@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="robot">
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/base_link.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/base_link.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_1_coxa">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_1_coxa.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_1_coxa.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_1_">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_1_.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_1_.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_2_coxa">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_2_coxa.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_2_coxa.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_2_femur">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_2_femur.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_2_femur.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_1_tibia">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_1_tibia.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_1_tibia.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_2_tibia">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_2_tibia.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_2_tibia.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_3_coxa">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_3_coxa.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_3_coxa.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_3_femur">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_3_femur.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_3_femur.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_3_tibia">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_3_tibia.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_3_tibia.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_4_coxa">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_4_coxa.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_4_coxa.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_4_femur">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_4_femur.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_4_femur.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_4_tibia">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_4_tibia.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_4_tibia.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_5_coxa">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_5_coxa.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_5_coxa.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_5_femur">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_5_femur.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_5_femur.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_5_tibia">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_5_tibia.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_5_tibia.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_6_coxa">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_6_coxa.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_6_coxa.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_6_femur">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_6_femur.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_6_femur.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="Leg_6_tibia">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_6_tibia.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///home/dolganin/Downloads/hexapod_urdf/meshes/Leg_6_tibia.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="Leg_1_coxa_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="Leg_1_coxa"/>
+    <origin xyz="-0.01645331 0.09357346 0.0417" rpy="0 0 1.57079633"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_1_femur_joint" type="revolute">
+    <parent link="Leg_1_coxa"/>
+    <child link="Leg_1_"/>
+    <origin xyz="0.05844458 0.02111143 -0.009025" rpy="-1.57079633 0 0.0628318"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_2_coxa_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="Leg_2_coxa"/>
+    <origin xyz="0.05519759 0.05517106 0.0417" rpy="0 0 1.57079633"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_2_femur_joint" type="revolute">
+    <parent link="Leg_2_coxa"/>
+    <child link="Leg_2_femur"/>
+    <origin xyz="0.05606918 -0.02679006 -0.009025" rpy="-1.57079633 0 -0.72953778"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_1_tibia_joint" type="revolute">
+    <parent link="Leg_1_"/>
+    <child link="Leg_1_tibia"/>
+    <origin xyz="0.06518491 -0.02752287 -0.00822065" rpy="0 0.0628318 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_2_tibia_joint" type="revolute">
+    <parent link="Leg_2_femur"/>
+    <child link="Leg_2_tibia"/>
+    <origin xyz="0.06436219 -0.02752287 -0.0004" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_3_coxa_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="Leg_3_coxa"/>
+    <origin xyz="0.0936 -0.01647985 0.0412" rpy="0 0 1.57079633"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_3_femur_joint" type="revolute">
+    <parent link="Leg_3_coxa"/>
+    <child link="Leg_3_femur"/>
+    <origin xyz="0.01841977 -0.0593479 -0.009025" rpy="-1.57079633 0 -1.55365821"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_3_tibia_joint" type="revolute">
+    <parent link="Leg_3_femur"/>
+    <child link="Leg_3_tibia"/>
+    <origin xyz="0.06436219 -0.02752287 -0.0004" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_4_coxa_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="Leg_4_coxa"/>
+    <origin xyz="-0.09351347 0.01651331 0.0412" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_4_femur_joint" type="revolute">
+    <parent link="Leg_4_coxa"/>
+    <child link="Leg_4_femur"/>
+    <origin xyz="-0.06206587 0.00304784 -0.009025" rpy="-1.57079633 0 2.80872097"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_4_tibia_joint" type="revolute">
+    <parent link="Leg_4_femur"/>
+    <child link="Leg_4_tibia"/>
+    <origin xyz="0.0643622 -0.02752287 -0.0004" rpy="0 2e-8 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_5_coxa_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="Leg_5_coxa"/>
+    <origin xyz="-0.05511107 -0.0551376 0.0417" rpy="0 0 1.57079633"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_5_femur_joint" type="revolute">
+    <parent link="Leg_5_coxa"/>
+    <child link="Leg_5_femur"/>
+    <origin xyz="-0.04759026 0.03995782 -0.009025" rpy="-1.57079633 0 2.15935012"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_5_tibia_joint" type="revolute">
+    <parent link="Leg_5_femur"/>
+    <child link="Leg_5_tibia"/>
+    <origin xyz="0.06436221 -0.02752287 -0.0004" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_6_coxa_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="Leg_6_coxa"/>
+    <origin xyz="0.01653984 -0.09354001 0.0417" rpy="0 0 1.57079633"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_6_femur_joint" type="revolute">
+    <parent link="Leg_6_coxa"/>
+    <child link="Leg_6_femur"/>
+    <origin xyz="-0.06193566 -0.00504314 -0.009025" rpy="-1.57079633 0 2.93903434"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+  <joint name="Leg_6_tibia_joint" type="revolute">
+    <parent link="Leg_6_femur"/>
+    <child link="Leg_6_tibia"/>
+    <origin xyz="0.06436219 -0.02752287 -0.00039999" rpy="0 -1e-8 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1"/>
+  </joint>
+</robot>
