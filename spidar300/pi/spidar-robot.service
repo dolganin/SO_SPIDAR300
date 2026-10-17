@@ -1,0 +1,20 @@
+# systemd unit: start the robot runtime at boot.
+#   sudo cp spidar-robot.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now spidar-robot
+# Edit User and WorkingDirectory if the repo is not in /home/pi/spidar300.
+[Unit]
+Description=SPIDAR300 hexapod runtime
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/spidar300/pi
+ExecStart=/usr/bin/python3 -m spider_pi.robot
+Restart=on-failure
+RestartSec=3
+KillSignal=SIGINT
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target

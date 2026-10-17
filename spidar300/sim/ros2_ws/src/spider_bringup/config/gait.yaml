@@ -1,0 +1,15 @@
+# Tripod gait parameters; change live with `ros2 param set /spider_gait <name> <value>`.
+spider_gait:
+  ros__parameters:
+    rate: 50.0              # Hz, sim time
+    cmd_timeout: 0.5        # s without /cmd_vel -> stop
+    body_height: 0.09       # base_link origin above ground, m
+    stance_reach: 0.15      # horizontal coxa axis -> foot at rest, m
+    step_length: 0.06       # longest foot stroke per stance, m
+    period: 0.8             # full cycle (both tripods swing once), s
+    lift_height: 0.03       # foot lift at mid-swing, m
+    max_linear: 0.10        # m/s
+    max_angular: 0.6        # rad/s
+    rise_reach: 0.19        # foot reach while pressing the body up / down, m
+    tuck_time: 1.5          # rest pose <-> feet tucked, s
+    rise_time: 2.0          # body ground <-> body_height, s

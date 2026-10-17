@@ -1,0 +1,30 @@
+# Raspberry Pi runtime for SPIDAR300 (python3 -m spider_pi.robot).
+legs: ../sim/ros2_ws/src/spider_description/config/legs.yaml   # relative to this file
+servos: servos.yaml
+
+bus:
+  port: /dev/ttyUSB0          # Feetech USB adapter; /dev/serial0 for the Pi UART (needs a half-duplex circuit)
+  baudrate: 1000000
+
+udp:
+  listen: 0.0.0.0
+  port: 5005
+
+rate: 50.0                    # control loop, Hz
+state_rate: 10.0              # positions read back and sent to the laptop, Hz
+cmd_timeout: 0.5              # s without a velocity command -> stop
+startup_velocity: 0.8         # rad/s for the first move into rest_pose
+shutdown_timeout: 12.0        # s allowed to lie down before torque goes off
+
+# Same names as the ROS gait node parameters.
+gait:
+  body_height: 0.09
+  stance_reach: 0.15
+  step_length: 0.06
+  period: 0.8
+  lift_height: 0.03
+  max_linear: 0.10
+  max_angular: 0.6
+  rise_reach: 0.19
+  tuck_time: 1.5
+  rise_time: 2.0

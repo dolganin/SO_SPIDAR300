@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<!-- Hexapod generated from config/legs.yaml (legs, joints, geometry, limits)
+     and config/links.yaml (meshes, inertials, collision boxes). -->
+<robot name="spider" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="sim" default="true"/>
+  <xacro:arg name="config_dir" default="$(find spider_description)/config"/>
+
+  <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_dir)/legs.yaml')}"/>
+  <xacro:property name="links" value="${xacro.load_yaml('$(arg config_dir)/links.yaml')}"/>
+  <xacro:property name="geo" value="${cfg['geometry']}"/>
+  <xacro:property name="servo" value="${cfg['servo']}"/>
+  <xacro:property name="mesh_dir" value="package://spider_description/meshes/visual"/>
+
+  <!-- Visual mesh, inertial and collision box of a link, by its key in links.yaml. -->
+  <xacro:macro name="body" params="key">
+    <xacro:property name="l" value="${links[key]}"/>
+    <inertial>
+      <origin xyz="${' '.join(str(x) for x in l['com'])}" rpy="0 0 0"/>
+      <mass value="${l['mass']}"/>
+      <inertia ixx="${l['inertia']['ixx']}" ixy="${l['inertia']['ixy']}" ixz="${l['inertia']['ixz']}"
+               iyy="${l['inertia']['iyy']}" iyz="${l['inertia']['iyz']}" izz="${l['inertia']['izz']}"/>
+    </inertial>
+    <visual>
+      <origin xyz="${' '.join(str(x) for x in l['visual']['xyz'])}" rpy="${' '.join(str(x) for x in l['visual']['rpy'])}"/>
+      <geometry>
+        <mesh filename="${mesh_dir}/${l['mesh']}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="${' '.join(str(x) for x in l['box']['xyz'])}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${' '.join(str(x) for x in l['box']['size'])}"/>
+      </geometry>
+    </collision>
+  </xacro:macro>
+
+  <xacro:macro name="servo_joint" params="name parent child xyz rpy axis part">
+    <joint name="${name}" type="revolute">
+      <parent link="${parent}"/>
+      <child link="${child}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <axis xyz="${axis}"/>
+      <limit lower="${cfg['limits'][part][0]}" upper="${cfg['limits'][part][1]}"
+             effort="${servo['effort']}" velocity="${servo['velocity']}"/>
+      <dynamics damping="${servo['damping']}" friction="${servo['friction']}"/>
+    </joint>
+    <xacro:if value="$(arg sim)">
+      <gazebo>
+        <plugin filename="gz-sim-joint-position-controller-system"
+                name="gz::sim::systems::JointPositionController">
+          <joint_name>${name}</joint_name>
+          <initial_position>${cfg['rest_pose'][part]}</initial_position>
+          <topic>/spider/${name}/cmd_pos</topic>
+          <p_gain>${cfg['controller']['p']}</p_gain>
+          <i_gain>${cfg['controller']['i']}</i_gain>
+          <d_gain>${cfg['controller']['d']}</d_gain>
+          <xacro:property name="vel" value="${cfg['controller']['use_velocity_commands']}"/>
+          <xacro:property name="cmd_limit" value="${servo['velocity'] if vel else servo['effort']}"/>
+          <use_velocity_commands>${'true' if vel else 'false'}</use_velocity_commands>
+          <i_max>${cmd_limit}</i_max>
+          <i_min>${-cmd_limit}</i_min>
+          <cmd_max>${cmd_limit}</cmd_max>
+          <cmd_min>${-cmd_limit}</cmd_min>
+        </plugin>
+      </gazebo>
+    </xacro:if>
+  </xacro:macro>
+
+  <xacro:macro name="leg" params="leg">
+    <xacro:property name="p" value="leg_${leg['name']}"/>
+    <xacro:servo_joint name="${p}_coxa" parent="base_link" child="${p}_coxa_link" part="coxa" axis="0 0 1"
+                       xyz="${' '.join(str(x) for x in leg['xyz'])}" rpy="0 0 ${leg['yaw']}"/>
+    <link name="${p}_coxa_link"><xacro:body key="${p}_coxa"/></link>
+
+    <xacro:servo_joint name="${p}_femur" parent="${p}_coxa_link" child="${p}_femur_link" part="femur" axis="0 -1 0"
+                       xyz="${' '.join(str(x) for x in geo['coxa'])}" rpy="0 0 0"/>
+    <link name="${p}_femur_link"><xacro:body key="${p}_femur"/></link>
+
+    <xacro:servo_joint name="${p}_tibia" parent="${p}_femur_link" child="${p}_tibia_link" part="tibia" axis="0 -1 0"
+                       xyz="${' '.join(str(x) for x in geo['femur'])}" rpy="0 0 0"/>
+    <link name="${p}_tibia_link">
+      <xacro:body key="${p}_tibia"/>
+      <collision name="${p}_foot_collision">
+        <origin xyz="${' '.join(str(x) for x in geo['foot'])}" rpy="0 0 0"/>
+        <geometry>
+          <sphere radius="${geo['foot_radius']}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Foot tip frame for TF; its collision sphere lives on the tibia so Gazebo keeps it. -->
+    <joint name="${p}_foot_fixed" type="fixed">
+      <parent link="${p}_tibia_link"/>
+      <child link="${p}_foot"/>
+      <origin xyz="${' '.join(str(x) for x in geo['foot'])}" rpy="0 0 0"/>
+    </joint>
+    <link name="${p}_foot">
+      <inertial>
+        <mass value="0.001"/>
+        <inertia ixx="1e-8" ixy="0" ixz="0" iyy="1e-8" iyz="0" izz="1e-8"/>
+      </inertial>
+    </link>
+
+    <gazebo reference="${p}_tibia_link">
+      <mu1>${cfg['foot_friction']}</mu1>
+      <mu2>${cfg['foot_friction']}</mu2>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="legs" params="items">
+    <xacro:if value="${len(items) > 0}">
+      <xacro:leg leg="${items[0]}"/>
+      <xacro:legs items="${items[1:]}"/>
+    </xacro:if>
+  </xacro:macro>
+
+  <link name="base_link"><xacro:body key="base_link"/></link>
+  <xacro:legs items="${cfg['legs']}"/>
+
+  <xacro:if value="$(arg sim)">
+    <gazebo>
+      <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+        <topic>/joint_states</topic>
+      </plugin>
+    </gazebo>
+  </xacro:if>
+</robot>
