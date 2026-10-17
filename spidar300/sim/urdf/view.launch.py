@@ -13,7 +13,7 @@ def _nodes(context):
     path = model if os.path.isabs(model) else os.path.join(_HERE, model)
     with open(path) as f:
         urdf = f.read()
-    urdf = urdf.replace('filename="meshes/', f'filename="file://{os.path.dirname(path)}/meshes/')
+    urdf = urdf.replace('filename="/', 'filename="file:///')
     return [
         Node(package="robot_state_publisher", executable="robot_state_publisher",
              parameters=[{"robot_description": ParameterValue(urdf, value_type=str)}]),
@@ -23,7 +23,7 @@ def _nodes(context):
 
 def generate_launch_description():
     return LaunchDescription([
-        DeclareLaunchArgument("model", default_value="robot_collision.urdf",
+        DeclareLaunchArgument("model", default_value="robot.urdf",
                               description="URDF file, relative to this directory or absolute"),
         OpaqueFunction(function=_nodes),
     ])

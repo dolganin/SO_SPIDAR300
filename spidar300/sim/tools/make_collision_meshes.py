@@ -18,9 +18,6 @@ SERVO_MASS = 0.060
 SERVO_VOLUME = 33.5e-6
 SINGLE_HULL_LINKS = {"base_link"}
 
-PALETTE = [(0.90, 0.30, 0.25), (0.20, 0.60, 0.90), (0.30, 0.75, 0.40), (0.95, 0.70, 0.20),
-           (0.65, 0.40, 0.85), (0.20, 0.75, 0.75), (0.90, 0.45, 0.70), (0.55, 0.55, 0.55)]
-
 coacd.set_log_level("error")
 
 def _parts(mesh: trimesh.Trimesh) -> list[trimesh.Trimesh]:
@@ -102,20 +99,9 @@ def _collision_xml(files: list[str]) -> str:
         f'      </geometry>\n'
         f'    </collision>' for f in files)
 
-def _debug_visual_xml(files: list[str]) -> str:
-    return "\n".join(
-        f'    <visual>\n'
-        f'      <origin xyz="0 0 0" rpy="0 0 0"/>\n'
-        f'      <geometry>\n'
-        f'        <mesh filename="{f}"/>\n'
-        f'      </geometry>\n'
-        f'      <material name="hull_{i % len(PALETTE)}"/>\n'
-        f'    </visual>' for i, f in enumerate(files))
-
 _LINK_RE = re.compile(r'(  <link name="([^"]+)">\n)(.*?)(  </link>)', re.S)
 _INERTIAL_RE = re.compile(r'    <inertial>.*</inertial>\n', re.S)
 _COLLISION_RE = re.compile(r'    <collision>.*</collision>\n', re.S)
-_VISUAL_RE = re.compile(r'    <visual>.*</visual>\n', re.S)
 _VISUAL_MESH_RE = re.compile(r'<visual>.*?<mesh filename="([^"]+)"', re.S)
 
 def main() -> None:
@@ -144,7 +130,7 @@ def main() -> None:
         for i, hull in enumerate(hulls):
             rel = f"meshes/collision/{name}_{i}.stl"
             hull.export(urdf.parent / rel)
-            files.append(rel)
+            files.append(str(urdf.parent / rel))
         files_by_link[name] = files
         inertial_by_link[name] = _inertial_xml(mesh)
         print(f"{name:14s} {len(mesh.faces):6d} tris -> {len(hulls)} hulls, "
@@ -157,25 +143,10 @@ def main() -> None:
         body = _COLLISION_RE.sub("", _INERTIAL_RE.sub("", m.group(3))) + _collision_xml(files) + "\n"
         return m.group(1) + inertial_by_link[m.group(2)] + body + m.group(4)
 
-    def as_debug(m: re.Match) -> str:
-        files = files_by_link.get(m.group(2))
-        if not files:
-            return m.group(0)
-        body = _VISUAL_RE.sub("", m.group(3))
-        return m.group(1) + _debug_visual_xml(files) + "\n" + body + m.group(4)
-
     text = _LINK_RE.sub(with_collision, text)
     urdf.write_text(text)
 
-    materials = "".join(
-        f'  <material name="hull_{i}">\n    <color rgba="{r} {g} {b} 1"/>\n  </material>\n'
-        for i, (r, g, b) in enumerate(PALETTE))
-    debug = _LINK_RE.sub(as_debug, text)
-    debug = re.sub(r'(<robot name="[^"]*">\n)', lambda m: m.group(1) + materials, debug, count=1)
-    debug_path = urdf.with_name(urdf.stem + "_collision.urdf")
-    debug_path.write_text(debug)
     print("written:", urdf)
-    print("written:", debug_path)
 
 if __name__ == "__main__":
     main()

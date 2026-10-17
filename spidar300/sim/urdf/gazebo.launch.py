@@ -29,7 +29,7 @@ def _nodes(context):
     path = model if os.path.isabs(model) else os.path.join(_HERE, model)
     with open(path) as f:
         urdf = f.read()
-    urdf = urdf.replace('filename="meshes/', f'filename="file://{os.path.dirname(path)}/meshes/')
+    urdf = urdf.replace('filename="/', 'filename="file:///')
     joints = re.findall(r'<joint name="([^"]+)" type="revolute">', urdf)
     urdf = urdf.replace("</robot>", "".join(_controller(j) for j in joints) + "</robot>")
     bridges = [f"/spider/{j}/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double" for j in joints]
@@ -50,7 +50,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument("model", default_value="robot.urdf",
                               description="URDF file, relative to this directory or absolute"),
-        DeclareLaunchArgument("z", default_value="0.075", description="Spawn height of base_link"),
+        DeclareLaunchArgument("z", default_value="0.12", description="Spawn height of base_link"),
         DeclareLaunchArgument("walk", default_value="true", description="Start the tripod gait"),
         DeclareLaunchArgument("heading", default_value="-45.0", description="Walking direction, degrees"),
         DeclareLaunchArgument("step", default_value="0.05", description="Stride length, m"),

@@ -11,6 +11,8 @@ LEGS = (1, 2, 3, 4, 5, 6)
 PARTS = ("coxa", "femur", "tibia")
 FOOT_IN_TIBIA = np.array([0.1111, 0.1255, -0.0193, 1.0])
 STAND_TIME = 2.0
+STANCE_REACH = 0.15
+STANCE_HEIGHT = 0.10
 
 def joint_name(leg: int, part: str) -> str:
     return f"Leg_{leg}_{part}_joint"
@@ -54,13 +56,30 @@ def solve_leg(chain: list[np.ndarray], target: np.ndarray, q: np.ndarray) -> np.
         q += jac.T @ np.linalg.solve(jac @ jac.T + 1e-6 * np.eye(3), err)
     return q
 
+def stance_target(chain: list[np.ndarray], reach: float = STANCE_REACH, height: float = STANCE_HEIGHT) -> np.ndarray:
+    hip = chain[0][:3, 3]
+    out = foot_position(chain, np.zeros(3)) - hip
+    radial = out[:2] / np.linalg.norm(out[:2])
+    return np.array([hip[0] + reach * radial[0], hip[1] + reach * radial[1], -height])
+
+def stance_joints(chains: dict[int, list[np.ndarray]]) -> dict[str, float]:
+    out = {}
+    for leg in LEGS:
+        q = np.zeros(3)
+        for _ in range(5):
+            q = solve_leg(chains[leg], stance_target(chains[leg]), q)
+        for part, angle in zip(PARTS, q):
+            out[joint_name(leg, part)] = float(angle)
+    return out
+
 class TripodGait:
     def __init__(self, urdf: str, heading_deg: float, step: float, lift: float, period: float):
         self.chains = load_chains(urdf)
         self.step, self.lift, self.period = step, lift, period
         a = math.radians(heading_deg)
         self.forward = np.array([math.cos(a), math.sin(a), 0.0])
-        self.q = {leg: np.zeros(3) for leg in LEGS}
+        stance = stance_joints(self.chains)
+        self.q = {leg: np.array([stance[joint_name(leg, part)] for part in PARTS]) for leg in LEGS}
         self.neutral = {leg: foot_position(self.chains[leg], self.q[leg]) for leg in LEGS}
         by_angle = sorted(LEGS, key=lambda leg: math.atan2(self.chains[leg][0][1, 3], self.chains[leg][0][0, 3]))
         self.phase = {leg: 0.5 * (i % 2) for i, leg in enumerate(by_angle)}

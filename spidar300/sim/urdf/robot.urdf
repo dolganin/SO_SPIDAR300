@@ -9,13 +9,13 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/base_link.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/base_link.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/base_link_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/base_link_0.stl"/>
       </geometry>
     </collision>
   </link>
@@ -28,59 +28,59 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_1_coxa.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_1_coxa.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_coxa_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_coxa_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_coxa_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_coxa_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_coxa_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_coxa_2.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_coxa_3.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_coxa_3.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_coxa_4.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_coxa_4.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_coxa_5.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_coxa_5.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_coxa_6.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_coxa_6.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_coxa_7.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_coxa_7.stl"/>
       </geometry>
     </collision>
   </link>
-  <link name="Leg_1_">
+  <link name="Leg_1_femur">
     <inertial>
       <origin xyz="0.029858 -0.018547 -0.024628" rpy="0 0 0"/>
       <mass value="0.0442"/>
@@ -89,25 +89,25 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_1_.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_1_femur.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1__0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_femur_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1__1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_femur_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1__2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_femur_2.stl"/>
       </geometry>
     </collision>
   </link>
@@ -120,55 +120,55 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_2_coxa.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_2_coxa.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_coxa_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_coxa_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_coxa_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_coxa_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_coxa_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_coxa_2.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_coxa_3.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_coxa_3.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_coxa_4.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_coxa_4.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_coxa_5.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_coxa_5.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_coxa_6.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_coxa_6.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_coxa_7.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_coxa_7.stl"/>
       </geometry>
     </collision>
   </link>
@@ -181,25 +181,25 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_2_femur.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_2_femur.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_femur_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_femur_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_femur_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_femur_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_femur_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_femur_2.stl"/>
       </geometry>
     </collision>
   </link>
@@ -212,49 +212,49 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_1_tibia.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_1_tibia.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_tibia_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_tibia_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_tibia_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_tibia_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_tibia_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_tibia_2.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_tibia_3.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_tibia_3.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_tibia_4.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_tibia_4.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_tibia_5.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_tibia_5.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_1_tibia_6.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_1_tibia_6.stl"/>
       </geometry>
     </collision>
   </link>
@@ -267,49 +267,49 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_2_tibia.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_2_tibia.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_tibia_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_tibia_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_tibia_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_tibia_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_tibia_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_tibia_2.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_tibia_3.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_tibia_3.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_tibia_4.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_tibia_4.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_tibia_5.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_tibia_5.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_2_tibia_6.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_2_tibia_6.stl"/>
       </geometry>
     </collision>
   </link>
@@ -322,55 +322,55 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_3_coxa.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_3_coxa.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_coxa_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_coxa_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_coxa_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_coxa_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_coxa_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_coxa_2.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_coxa_3.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_coxa_3.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_coxa_4.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_coxa_4.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_coxa_5.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_coxa_5.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_coxa_6.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_coxa_6.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_coxa_7.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_coxa_7.stl"/>
       </geometry>
     </collision>
   </link>
@@ -383,25 +383,25 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_3_femur.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_3_femur.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_femur_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_femur_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_femur_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_femur_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_femur_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_femur_2.stl"/>
       </geometry>
     </collision>
   </link>
@@ -414,49 +414,49 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_3_tibia.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_3_tibia.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_tibia_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_tibia_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_tibia_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_tibia_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_tibia_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_tibia_2.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_tibia_3.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_tibia_3.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_tibia_4.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_tibia_4.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_tibia_5.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_tibia_5.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_3_tibia_6.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_3_tibia_6.stl"/>
       </geometry>
     </collision>
   </link>
@@ -469,55 +469,55 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_4_coxa.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_4_coxa.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_coxa_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_coxa_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_coxa_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_coxa_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_coxa_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_coxa_2.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_coxa_3.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_coxa_3.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_coxa_4.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_coxa_4.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_coxa_5.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_coxa_5.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_coxa_6.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_coxa_6.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_coxa_7.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_coxa_7.stl"/>
       </geometry>
     </collision>
   </link>
@@ -530,25 +530,25 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_4_femur.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_4_femur.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_femur_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_femur_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_femur_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_femur_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_femur_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_femur_2.stl"/>
       </geometry>
     </collision>
   </link>
@@ -561,49 +561,49 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_4_tibia.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_4_tibia.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_tibia_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_tibia_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_tibia_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_tibia_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_tibia_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_tibia_2.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_tibia_3.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_tibia_3.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_tibia_4.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_tibia_4.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_tibia_5.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_tibia_5.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_4_tibia_6.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_4_tibia_6.stl"/>
       </geometry>
     </collision>
   </link>
@@ -616,55 +616,55 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_5_coxa.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_5_coxa.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_coxa_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_coxa_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_coxa_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_coxa_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_coxa_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_coxa_2.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_coxa_3.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_coxa_3.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_coxa_4.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_coxa_4.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_coxa_5.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_coxa_5.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_coxa_6.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_coxa_6.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_coxa_7.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_coxa_7.stl"/>
       </geometry>
     </collision>
   </link>
@@ -677,25 +677,25 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_5_femur.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_5_femur.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_femur_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_femur_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_femur_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_femur_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_femur_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_femur_2.stl"/>
       </geometry>
     </collision>
   </link>
@@ -708,49 +708,49 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_5_tibia.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_5_tibia.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_tibia_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_tibia_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_tibia_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_tibia_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_tibia_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_tibia_2.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_tibia_3.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_tibia_3.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_tibia_4.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_tibia_4.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_tibia_5.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_tibia_5.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_5_tibia_6.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_5_tibia_6.stl"/>
       </geometry>
     </collision>
   </link>
@@ -763,55 +763,55 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_6_coxa.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_6_coxa.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_coxa_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_coxa_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_coxa_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_coxa_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_coxa_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_coxa_2.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_coxa_3.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_coxa_3.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_coxa_4.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_coxa_4.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_coxa_5.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_coxa_5.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_coxa_6.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_coxa_6.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_coxa_7.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_coxa_7.stl"/>
       </geometry>
     </collision>
   </link>
@@ -824,25 +824,25 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_6_femur.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_6_femur.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_femur_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_femur_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_femur_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_femur_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_femur_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_femur_2.stl"/>
       </geometry>
     </collision>
   </link>
@@ -855,49 +855,49 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/Leg_6_tibia.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/Leg_6_tibia.stl"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_tibia_0.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_tibia_0.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_tibia_1.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_tibia_1.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_tibia_2.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_tibia_2.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_tibia_3.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_tibia_3.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_tibia_4.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_tibia_4.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_tibia_5.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_tibia_5.stl"/>
       </geometry>
     </collision>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/collision/Leg_6_tibia_6.stl"/>
+        <mesh filename="/workspace/code/SO_SPIDAR300/spidar300/sim/urdf/meshes/collision/Leg_6_tibia_6.stl"/>
       </geometry>
     </collision>
   </link>
@@ -906,125 +906,125 @@
     <child link="Leg_1_coxa"/>
     <origin xyz="-0.01645331 0.09357346 0.0417" rpy="0 0 1.57079633"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-1.45" upper="1.508" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_1_femur_joint" type="revolute">
     <parent link="Leg_1_coxa"/>
-    <child link="Leg_1_"/>
+    <child link="Leg_1_femur"/>
     <origin xyz="0.05844458 0.02111143 -0.009025" rpy="-1.57079633 0 0.0628318"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-2.2" upper="2.5" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_2_coxa_joint" type="revolute">
     <parent link="base_link"/>
     <child link="Leg_2_coxa"/>
     <origin xyz="0.05519759 0.05517106 0.0417" rpy="0 0 1.57079633"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-1.45" upper="1.508" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_2_femur_joint" type="revolute">
     <parent link="Leg_2_coxa"/>
     <child link="Leg_2_femur"/>
     <origin xyz="0.05606918 -0.02679006 -0.009025" rpy="-1.57079633 0 -0.72953778"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-2.2" upper="2.5" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_1_tibia_joint" type="revolute">
-    <parent link="Leg_1_"/>
+    <parent link="Leg_1_femur"/>
     <child link="Leg_1_tibia"/>
     <origin xyz="0.06518491 -0.02752287 -0.00822065" rpy="0 0.0628318 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-1.477" upper="1.66" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_2_tibia_joint" type="revolute">
     <parent link="Leg_2_femur"/>
     <child link="Leg_2_tibia"/>
     <origin xyz="0.06436219 -0.02752287 -0.0004" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-1.477" upper="1.66" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_3_coxa_joint" type="revolute">
     <parent link="base_link"/>
     <child link="Leg_3_coxa"/>
     <origin xyz="0.0936 -0.01647985 0.0412" rpy="0 0 1.57079633"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-1.45" upper="1.508" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_3_femur_joint" type="revolute">
     <parent link="Leg_3_coxa"/>
     <child link="Leg_3_femur"/>
     <origin xyz="0.01841977 -0.0593479 -0.009025" rpy="-1.57079633 0 -1.55365821"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-2.2" upper="2.5" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_3_tibia_joint" type="revolute">
     <parent link="Leg_3_femur"/>
     <child link="Leg_3_tibia"/>
     <origin xyz="0.06436219 -0.02752287 -0.0004" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-1.477" upper="1.66" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_4_coxa_joint" type="revolute">
     <parent link="base_link"/>
     <child link="Leg_4_coxa"/>
     <origin xyz="-0.09351347 0.01651331 0.0412" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-1.45" upper="1.508" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_4_femur_joint" type="revolute">
     <parent link="Leg_4_coxa"/>
     <child link="Leg_4_femur"/>
     <origin xyz="-0.06206587 0.00304784 -0.009025" rpy="-1.57079633 0 2.80872097"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-2.2" upper="2.5" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_4_tibia_joint" type="revolute">
     <parent link="Leg_4_femur"/>
     <child link="Leg_4_tibia"/>
     <origin xyz="0.0643622 -0.02752287 -0.0004" rpy="0 2e-8 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-1.477" upper="1.66" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_5_coxa_joint" type="revolute">
     <parent link="base_link"/>
     <child link="Leg_5_coxa"/>
     <origin xyz="-0.05511107 -0.0551376 0.0417" rpy="0 0 1.57079633"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-1.45" upper="1.508" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_5_femur_joint" type="revolute">
     <parent link="Leg_5_coxa"/>
     <child link="Leg_5_femur"/>
     <origin xyz="-0.04759026 0.03995782 -0.009025" rpy="-1.57079633 0 2.15935012"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-2.2" upper="2.5" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_5_tibia_joint" type="revolute">
     <parent link="Leg_5_femur"/>
     <child link="Leg_5_tibia"/>
     <origin xyz="0.06436221 -0.02752287 -0.0004" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-1.477" upper="1.66" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_6_coxa_joint" type="revolute">
     <parent link="base_link"/>
     <child link="Leg_6_coxa"/>
     <origin xyz="0.01653984 -0.09354001 0.0417" rpy="0 0 1.57079633"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-1.45" upper="1.508" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_6_femur_joint" type="revolute">
     <parent link="Leg_6_coxa"/>
     <child link="Leg_6_femur"/>
     <origin xyz="-0.06193566 -0.00504314 -0.009025" rpy="-1.57079633 0 2.93903434"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-2.2" upper="2.5" effort="1.9" velocity="4.7"/>
   </joint>
   <joint name="Leg_6_tibia_joint" type="revolute">
     <parent link="Leg_6_femur"/>
     <child link="Leg_6_tibia"/>
     <origin xyz="0.06436219 -0.02752287 -0.00039999" rpy="0 -1e-8 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14159" upper="3.14159" effort="1.86" velocity="5.8"/>
+    <limit lower="-1.477" upper="1.66" effort="1.9" velocity="4.7"/>
   </joint>
 </robot>
