@@ -9,6 +9,8 @@ Board: Waveshare / Feetech serial bus servo driver over USB (/dev/ttyACM0), 1 Mb
 """
 from __future__ import annotations
 
+import time
+
 TICKS_PER_TURN = 4096
 CENTER = 2048
 
@@ -16,6 +18,9 @@ ADDR_OFFSET = 31            # EEPROM, sign bit 11: present position = raw - offs
 ADDR_TORQUE_ENABLE = 40
 ADDR_PRESENT_POSITION = 56
 COMM_SUCCESS = 0
+EEPROM_RETRIES = 3
+EEPROM_PAUSE = 0.03         # s; EEPROM writes take a few ms on the servo
+CENTER_TOLERANCE = 3        # ticks
 
 
 class BusError(IOError):
@@ -110,12 +115,21 @@ class StsBus:
     # -- EEPROM ----------------------------------------------------------------------
 
     def _write_eeprom(self, servo_id: int, address: int, value: int, nbytes: int) -> None:
-        self.sdk.unLockEprom(servo_id)
+        """Unlock, write, lock; retried, with pauses: a servo busy writing EEPROM may miss the next packet."""
         write = self.sdk.write1ByteTxRx if nbytes == 1 else self.sdk.write2ByteTxRx
-        result, error = write(servo_id, address, value)
-        self.sdk.LockEprom(servo_id if address != 5 else value)
-        if result != COMM_SUCCESS or error:
-            raise BusError(f"servo {servo_id}: EEPROM write {address} failed ({result}, {error})")
+        last = None
+        for _ in range(EEPROM_RETRIES):
+            self.sdk.unLockEprom(servo_id)
+            time.sleep(EEPROM_PAUSE)
+            result, error = write(servo_id, address, value)
+            time.sleep(EEPROM_PAUSE)
+            self.sdk.LockEprom(servo_id if address != 5 else value)
+            time.sleep(EEPROM_PAUSE)
+            if result == COMM_SUCCESS and not error:
+                return
+            last = (result, error)
+        raise BusError(f"servo {servo_id}: EEPROM write {address} failed {EEPROM_RETRIES} times {last}; "
+                       "check the servo power")
 
     def set_id(self, old: int, new: int) -> None:
         self._write_eeprom(old, 5, new, 1)
@@ -125,16 +139,25 @@ class StsBus:
             raise ValueError(f"offset {offset} out of range")
         self._write_eeprom(servo_id, ADDR_OFFSET, self.sdk.scs_toscs(int(offset), 11), 2)
 
+    def _position(self, servo_id: int) -> int:
+        for _ in range(EEPROM_RETRIES):
+            pos = self.positions([servo_id]).get(servo_id)
+            if pos is not None:
+                return pos
+            time.sleep(EEPROM_PAUSE)
+        raise BusError(f"servo {servo_id}: no position reply; check the servo power")
+
     def center_here(self, servo_id: int) -> int:
         """Make the servo's current pose read as CENTER (2048), like leg_twister.ipynb. Returns the offset."""
-        self.set_offset(servo_id, 0)
-        raw = self.positions([servo_id]).get(servo_id)
-        if raw is None:
-            raise BusError(f"servo {servo_id}: no position")
-        offset = raw - CENTER
-        if offset > 2047:
-            offset -= TICKS_PER_TURN
-        elif offset < -2047:
-            offset += TICKS_PER_TURN
-        self.set_offset(servo_id, offset)
-        return offset
+        for _ in range(EEPROM_RETRIES):
+            self.set_offset(servo_id, 0)
+            raw = self._position(servo_id)
+            offset = raw - CENTER
+            if offset > 2047:
+                offset -= TICKS_PER_TURN
+            elif offset < -2047:
+                offset += TICKS_PER_TURN
+            self.set_offset(servo_id, offset)
+            if abs(self._position(servo_id) - CENTER) <= CENTER_TOLERANCE:
+                return offset
+        raise BusError(f"servo {servo_id}: does not read {CENTER} after setting the offset; was the leg held still?")

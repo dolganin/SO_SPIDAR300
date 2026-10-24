@@ -84,3 +84,20 @@ def test_center_here_positive_negative_and_wrapping():
         assert bus.sdk.locked[i]
     assert bus.sdk.offset[112] == 1513
     assert bus.sdk.offset[123] == -1048
+
+
+def test_center_here_retries_a_missed_eeprom_write(monkeypatch):
+    monkeypatch.setattr(sts, "EEPROM_PAUSE", 0.0)
+    bus = bus_with({112: 3561})
+    real = bus.sdk.write2ByteTxRx
+    misses = {"left": 1}
+
+    def flaky(i, addr, value):
+        if misses["left"]:
+            misses["left"] -= 1
+            return -6, 0                     # COMM_RX_TIMEOUT, as seen on the robot
+        return real(i, addr, value)
+
+    bus.sdk.write2ByteTxRx = flaky
+    assert bus.center_here(112) == 1513
+    assert bus.positions([112]) == {112: 2048}
