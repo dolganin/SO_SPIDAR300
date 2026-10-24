@@ -9,8 +9,6 @@ Board: Waveshare / Feetech serial bus servo driver over USB (/dev/ttyACM0), 1 Mb
 """
 from __future__ import annotations
 
-import time
-
 TICKS_PER_TURN = 4096
 CENTER = 2048
 
@@ -19,7 +17,6 @@ ADDR_TORQUE_ENABLE = 40
 ADDR_PRESENT_POSITION = 56
 COMM_SUCCESS = 0
 EEPROM_RETRIES = 3
-EEPROM_PAUSE = 0.03         # s; EEPROM writes take a few ms on the servo
 CENTER_TOLERANCE = 3        # ticks
 
 
@@ -84,29 +81,47 @@ class StsBus:
         else:
             self.sdk = sms_sts(self.port)
         self.acc = acc
+        self.stats = {"stale_bytes": 0, "garbled": 0, "retries": 0}   # bus hiccups, for diagnostics
 
     def close(self) -> None:
         self.port.closePort()
 
+    def _flush_input(self) -> None:
+        """Drop replies left in the receive buffer (the SDK only flushes output) so none is taken for ours."""
+        ser = getattr(self.port, "ser", None)
+        if ser is not None and ser.in_waiting:
+            self.stats["stale_bytes"] += ser.in_waiting
+            ser.reset_input_buffer()
+
+    def _request(self, fn, *args):
+        """One SDK transaction on a clean receive buffer; None if the SDK choked on a garbled reply."""
+        self._flush_input()
+        try:
+            return fn(*args)
+        except (IndexError, TypeError, ValueError):     # SDK indexing a short / foreign packet
+            self.stats["garbled"] += 1
+            return None
+
     def ping(self, servo_id: int) -> bool:
-        _, result, _ = self.sdk.ping(servo_id)
-        return result == COMM_SUCCESS
+        r = self._request(self.sdk.ping, servo_id)
+        return r is not None and r[1] == COMM_SUCCESS
 
     def torque(self, ids: list[int], enable: bool) -> None:
         for i in ids:
-            self.sdk.write1ByteTxRx(i, ADDR_TORQUE_ENABLE, 1 if enable else 0)
+            self._request(self.sdk.write1ByteTxRx, i, ADDR_TORQUE_ENABLE, 1 if enable else 0)
 
     def positions(self, ids: list[int]) -> dict[int, int]:
         """Present positions of the servos that answered."""
         out = {}
         for i in ids:
-            pos, result, _ = self.sdk.ReadPos(i)
-            if result == COMM_SUCCESS:
-                out[i] = pos
+            r = self._request(self.sdk.ReadPos, i)
+            if r is not None and r[1] == COMM_SUCCESS:
+                out[i] = r[0]
         return out
 
     def move(self, goals: dict[int, tuple[int, int]]) -> None:
         """goals: id -> (position ticks, speed ticks/s; 0 = maximum). One sync-write packet."""
+        self._flush_input()
         for i, (pos, speed) in goals.items():
             self.sdk.SyncWritePosEx(i, int(pos), int(speed), self.acc)
         self.sdk.groupSyncWrite.txPacket()
@@ -115,19 +130,18 @@ class StsBus:
     # -- EEPROM ----------------------------------------------------------------------
 
     def _write_eeprom(self, servo_id: int, address: int, value: int, nbytes: int) -> None:
-        """Unlock, write, lock; retried, with pauses: a servo busy writing EEPROM may miss the next packet."""
+        """Unlock, write, lock back to back, as in leg_twister.ipynb; retried if the write is not acknowledged."""
         write = self.sdk.write1ByteTxRx if nbytes == 1 else self.sdk.write2ByteTxRx
         last = None
-        for _ in range(EEPROM_RETRIES):
-            self.sdk.unLockEprom(servo_id)
-            time.sleep(EEPROM_PAUSE)
-            result, error = write(servo_id, address, value)
-            time.sleep(EEPROM_PAUSE)
-            self.sdk.LockEprom(servo_id if address != 5 else value)
-            time.sleep(EEPROM_PAUSE)
-            if result == COMM_SUCCESS and not error:
+        for attempt in range(EEPROM_RETRIES):
+            if attempt:
+                self.stats["retries"] += 1
+            self._request(self.sdk.unLockEprom, servo_id)
+            r = self._request(write, servo_id, address, value)
+            self._request(self.sdk.LockEprom, servo_id if address != 5 else value)
+            if r is not None and r[0] == COMM_SUCCESS and not r[1]:
                 return
-            last = (result, error)
+            last = r
         raise BusError(f"servo {servo_id}: EEPROM write {address} failed {EEPROM_RETRIES} times {last}; "
                        "check the servo power")
 
@@ -140,11 +154,12 @@ class StsBus:
         self._write_eeprom(servo_id, ADDR_OFFSET, self.sdk.scs_toscs(int(offset), 11), 2)
 
     def _position(self, servo_id: int) -> int:
-        for _ in range(EEPROM_RETRIES):
+        for attempt in range(EEPROM_RETRIES):
+            if attempt:
+                self.stats["retries"] += 1
             pos = self.positions([servo_id]).get(servo_id)
             if pos is not None:
                 return pos
-            time.sleep(EEPROM_PAUSE)
         raise BusError(f"servo {servo_id}: no position reply; check the servo power")
 
     def center_here(self, servo_id: int) -> int:

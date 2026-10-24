@@ -69,6 +69,8 @@ def cmd_zero(cfg, args) -> None:
         offset = bus.center_here(c.id)
         print(f"  {c.joint:14s} id {c.id:3d}  offset {offset:+5d}")
     servos.save_zeros({c.joint: 2048 for c in cal})
+    if any(bus.stats.values()):
+        print(f"bus hiccups (recovered): {bus.stats}")
     print(f"offsets written to the servos; zero = 2048 in {servos.path}")
 
 

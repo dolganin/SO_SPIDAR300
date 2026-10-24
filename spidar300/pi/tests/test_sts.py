@@ -59,6 +59,8 @@ def bus_with(raw):
     bus = sts.StsBus.__new__(sts.StsBus)
     bus.sdk = StubSdk(raw)
     bus.acc = 0
+    bus.port = object()                      # no .ser: nothing to flush
+    bus.stats = {"stale_bytes": 0, "garbled": 0, "retries": 0}
     return bus
 
 
@@ -86,8 +88,7 @@ def test_center_here_positive_negative_and_wrapping():
     assert bus.sdk.offset[123] == -1048
 
 
-def test_center_here_retries_a_missed_eeprom_write(monkeypatch):
-    monkeypatch.setattr(sts, "EEPROM_PAUSE", 0.0)
+def test_center_here_retries_a_missed_eeprom_write():
     bus = bus_with({112: 3561})
     real = bus.sdk.write2ByteTxRx
     misses = {"left": 1}
@@ -101,3 +102,21 @@ def test_center_here_retries_a_missed_eeprom_write(monkeypatch):
     bus.sdk.write2ByteTxRx = flaky
     assert bus.center_here(112) == 1513
     assert bus.positions([112]) == {112: 2048}
+
+
+def test_garbled_read_is_retried_not_fatal():
+    """The robot's failure: the SDK raises IndexError on a reply without data."""
+    bus = bus_with({111: 73})
+    real = bus.sdk.ReadPos
+    calls = {"n": 0}
+
+    def garbled_once(i):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise IndexError("list index out of range")
+        return real(i)
+
+    bus.sdk.ReadPos = garbled_once
+    bus.center_here(111)
+    assert bus.positions([111]) == {111: 2048}
+    assert bus.stats["garbled"] == 1
