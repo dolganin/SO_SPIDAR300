@@ -25,7 +25,9 @@ pip install git+https://github.com/ftservo/FTServo_Python.git   # provides scser
 sudo usermod -aG dialout $USER        # serial port access, then log out and back in
 ```
 
-(`pip install feetech-servo-sdk` from PyPI has no `sms_sts`; use the repository above.)
+Either flavour of `scservo_sdk` works: the FTServo one (with `sms_sts`) or `feetech-servo-sdk`
+from PyPI (what LeRobot installs, e.g. in `lerobot-venv`). Don't install one over the other
+in a LeRobot environment; LeRobot needs the PyPI one.
 
 Board: Waveshare / Feetech bus servo driver over USB, `/dev/ttyACM0`, 1 Mbaud (`config.yaml`).
 The servos need their own supply, not the Pi's 5 V.
