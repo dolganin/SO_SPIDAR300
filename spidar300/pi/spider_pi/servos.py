@@ -31,6 +31,10 @@ class ServoMap:
             raise ValueError(f"{self.path}: no servo for {missing}")
         self.cal = [ServoCal(j, int(raw[j]["id"]), int(raw[j]["zero"]), int(raw[j]["sign"])) for j in joint_names]
         self.ids = [c.id for c in self.cal]
+        self._index = {c.joint: i for i, c in enumerate(self.cal)}
+
+    def index(self, joint: str) -> int:
+        return self._index[joint]
 
     def to_ticks(self, q) -> list[int]:
         return [int(round(c.zero + c.sign * a * TICKS_PER_RAD)) for c, a in zip(self.cal, q)]

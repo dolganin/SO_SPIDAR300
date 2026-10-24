@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import sys
 import time
 from pathlib import Path
 
@@ -22,7 +23,7 @@ import yaml
 from spider_gait.kinematics import Hexapod
 
 from .robot import _HERE, load_config
-from .servos import ServoMap
+from .servos import TICKS_PER_RAD, ServoMap
 from .sts import StsBus
 
 
@@ -33,12 +34,14 @@ def open_bus(cfg) -> StsBus:
 def cmd_scan(cfg, args) -> None:
     bus = open_bus(cfg)
     found = [i for i in range(args.first, args.last + 1) if bus.ping(i)]
-    print(f"servos on {cfg['bus']['port']}: {found or 'none'}")
+    print(f"servos on {cfg['bus']['port']}: {found or 'none'} ({len(found)})")
     expected = {c["id"] for c in yaml.safe_load(open(cfg["servos"]))["servos"].values()}
-    if missing := sorted(expected - set(found)):
-        print(f"missing from servos.yaml: {missing}")
+    if not found:
+        print("nothing answers: check servo power, the port (ls /dev/ttyACM*) and that no other program uses it")
+    elif missing := sorted(expected - set(found)):
+        print(f"in servos.yaml but not answering: {missing}")
     if extra := sorted(set(found) - expected):
-        print(f"not in servos.yaml: {extra}")
+        print(f"answering but not in servos.yaml: {extra}")
 
 
 def cmd_set_id(cfg, args) -> None:
@@ -69,21 +72,49 @@ def cmd_zero(cfg, args) -> None:
     print(f"offsets written to the servos; zero = 2048 in {servos.path}")
 
 
+LEG_TITLES = {"lf": "left front", "lm": "left middle", "lr": "left rear",
+              "rf": "right front", "rm": "right middle", "rr": "right rear"}
+
+
+def read_table(hexapod: Hexapod, servos: ServoMap, ticks: dict[int, int]) -> list[str]:
+    """One line per leg: id, raw ticks and joint angle for coxa / femur / tibia."""
+    lines = [f"{'':16s}" + "".join(f"  {j:<22s}" for j in hexapod.joints),
+             f"{'':16s}" + f"{'  id  ticks    angle':<24s}" * len(hexapod.joints)]
+    for leg in hexapod.legs:
+        cells = []
+        for j in hexapod.joints:
+            c = servos.cal[servos.index(f"leg_{leg}_{j}")]
+            if c.id in ticks:
+                angle = c.sign * (ticks[c.id] - c.zero) / TICKS_PER_RAD
+                cells.append(f"{c.id:3d}  {ticks[c.id]:5d}  {math.degrees(angle):+7.1f}°")
+            else:
+                cells.append(f"{c.id:3d}    ---   no reply")
+        lines.append(f"{leg} {LEG_TITLES[leg]:13s}" + "".join(f"{x:<24s}" for x in cells))
+    return lines
+
+
 def cmd_read(cfg, args) -> None:
     hexapod = Hexapod.load(cfg["legs"])
     servos = ServoMap(cfg["servos"], hexapod.joint_names)
     bus = open_bus(cfg)
+    print("angles in the legs.yaml convention: 0 = zero pose; Ctrl-C to stop")
+    drawn = 0
     try:
         while True:
-            q = servos.to_angles(bus.positions(servos.ids))
-            if q is None:
-                print("\rsome servos did not answer", end="")
+            ticks = bus.positions(servos.ids)
+            lines = read_table(hexapod, servos, ticks)
+            if not ticks:
+                lines.append("no servo answers: check servo power and the port (ls /dev/ttyACM*)")
             else:
-                rows = [" ".join(f"{math.degrees(a):+6.1f}" for a in q[i:i + 3]) for i in range(0, len(q), 3)]
-                print("\r" + " | ".join(f"{leg} {r}" for leg, r in zip(hexapod.legs, rows)), end="", flush=True)
+                lines.append("")
+            if drawn:
+                sys.stdout.write(f"\x1b[{drawn}F")
+            sys.stdout.write("".join(f"\x1b[2K{l}\n" for l in lines))
+            sys.stdout.flush()
+            drawn = len(lines)
             time.sleep(0.1)
     except KeyboardInterrupt:
-        print()
+        pass
 
 
 def cmd_jog(cfg, args) -> None:
