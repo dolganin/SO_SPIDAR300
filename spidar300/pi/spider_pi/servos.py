@@ -66,7 +66,10 @@ class ServoMap:
 HEADER = """\
 # Servo bus id, encoder ticks at joint zero, and direction for every joint.
 # Joint zero and positive direction are defined in spider_description/config/legs.yaml.
-# Fill `zero` with `python3 -m spider_pi.calibrate zero`, check `sign` with `... jog`.
+# Ids: <side><leg><joint>, side 1 = left, 2 = right; leg 1 = front, 2 = middle, 3 = rear;
+# joint 1 = coxa, 2 = femur, 3 = tibia (numbering from numerate_motors.ipynb).
+# `python3 -m spider_pi.calibrate zero` writes each servo's EEPROM offset so the zero pose
+# reads 2048 (as in leg_twister.ipynb); `zero` stays 2048 then. Check `sign` with `... jog`.
 """
 
 
@@ -94,6 +97,11 @@ class FakeBus:
         for i, (p, _) in goals.items():
             if self.torque_on.get(i):
                 self.pos[i] = p
+
+    def center_here(self, servo_id: int) -> int:
+        offset = self.pos[servo_id] - 2048
+        self.pos[servo_id] = 2048
+        return offset
 
     def close(self) -> None:
         pass

@@ -2,7 +2,7 @@
 
   python3 -m spider_pi.calibrate scan                 list servo ids on the bus
   python3 -m spider_pi.calibrate set-id OLD NEW       renumber (only that servo connected)
-  python3 -m spider_pi.calibrate zero                 torque off, pose by hand, record zeros
+  python3 -m spider_pi.calibrate zero [JOINT...]      torque off, pose by hand, write EEPROM offsets
   python3 -m spider_pi.calibrate read                 live joint angles from the encoders
   python3 -m spider_pi.calibrate jog JOINT [DELTA]    move one joint by DELTA rad to check its sign
 
@@ -50,21 +50,23 @@ def cmd_set_id(cfg, args) -> None:
 
 
 def cmd_zero(cfg, args) -> None:
+    """Like leg_twister.ipynb: write each servo's offset so the current pose reads 2048."""
     names = Hexapod.load(cfg["legs"]).joint_names
     servos = ServoMap(cfg["servos"], names)
+    joints = args.joints or names
+    unknown = [j for j in joints if j not in names]
+    if unknown:
+        raise SystemExit(f"unknown joints {unknown}")
+    cal = [servos.cal[names.index(j)] for j in joints]
     bus = open_bus(cfg)
-    bus.torque(servos.ids, False)
-    print("Torque is off. Put the robot in the zero pose (see --help), hold it, press Enter.")
+    bus.torque([c.id for c in cal], False)
+    print(f"Torque is off for {len(cal)} servos. Put them in the zero pose (see --help), hold, press Enter.")
     input()
-    ticks = bus.positions(servos.ids)
-    missing = [c.joint for c in servos.cal if c.id not in ticks]
-    if missing:
-        raise SystemExit(f"no answer from {missing}; nothing saved")
-    zeros = {c.joint: ticks[c.id] for c in servos.cal}
-    for joint, t in zeros.items():
-        print(f"  {joint:14s} id {servos.cal[names.index(joint)].id:3d}  zero {t}")
-    servos.save_zeros(zeros)
-    print(f"saved to {servos.path}")
+    for c in cal:
+        offset = bus.center_here(c.id)
+        print(f"  {c.joint:14s} id {c.id:3d}  offset {offset:+5d}")
+    servos.save_zeros({c.joint: 2048 for c in cal})
+    print(f"offsets written to the servos; zero = 2048 in {servos.path}")
 
 
 def cmd_read(cfg, args) -> None:
@@ -118,11 +120,12 @@ def main(argv=None) -> None:
     sub = parser.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("scan")
     p.add_argument("--first", type=int, default=1)
-    p.add_argument("--last", type=int, default=30)
+    p.add_argument("--last", type=int, default=253)
     p = sub.add_parser("set-id")
     p.add_argument("old", type=int)
     p.add_argument("new", type=int)
-    sub.add_parser("zero")
+    p = sub.add_parser("zero")
+    p.add_argument("joints", nargs="*", help="only these joints (default: all 18)")
     sub.add_parser("read")
     p = sub.add_parser("jog")
     p.add_argument("joint")

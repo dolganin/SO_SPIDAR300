@@ -15,40 +15,47 @@ The gait code is the same `gait.py` / `kinematics.py` as in simulation
 
 ## Install on the Pi
 
-Raspberry Pi OS (Bookworm, 64-bit) or Ubuntu:
+The servo bus goes through Feetech's `scservo_sdk` (`sms_sts`, `PortHandler`) — the same
+library as `servo.py`, `spider_control.py` and the notebooks in the repo root. If those
+notebooks work on the Pi, everything is already installed. Otherwise:
 
 ```bash
 sudo apt install -y git python3-numpy python3-yaml python3-serial
-git clone <repo> ~/spidar300          # only spidar300/ is needed
+pip install git+https://github.com/ftservo/FTServo_Python.git   # provides scservo_sdk.sms_sts
 sudo usermod -aG dialout $USER        # serial port access, then log out and back in
 ```
 
-Servos: Feetech USB bus adapter (FE-URT-1 or similar) -> `/dev/ttyUSB0` (sometimes `/dev/ttyACM0`).
-Set the port in `config.yaml`. The servos need their own supply (6-8.4 V for STS3215), not the Pi's 5 V.
+(`pip install feetech-servo-sdk` from PyPI has no `sms_sts`; use the repository above.)
 
-## First time: ids and calibration
+Board: Waveshare / Feetech bus servo driver over USB, `/dev/ttyACM0`, 1 Mbaud (`config.yaml`).
+The servos need their own supply, not the Pi's 5 V.
+
+## First time: calibration
 
 All commands from `pi/`. `--config` defaults to `pi/config.yaml`.
 
-1. **Ids.** New servos are all id 1. Connect them one at a time and number them as in
-   `servos.yaml` (lf coxa = 1, lf femur = 2, ... rr tibia = 18):
+1. **Ids** — `<side><leg><joint>` as numbered with `numerate_motors.ipynb`:
+   side 1 = left, 2 = right; leg 1 = front, 2 = middle, 3 = rear; joint 1 = coxa,
+   2 = femur, 3 = tibia (`servos.yaml`).
    ```bash
-   python3 -m spider_pi.calibrate scan
-   python3 -m spider_pi.calibrate set-id 1 7
+   python3 -m spider_pi.calibrate scan          # must list all 18: 111..133, 211..233
    ```
-   With all 18 connected, `scan` must list 1..18.
-2. **Zeros.** Torque goes off; hold the robot in the air in the zero pose: every coxa
-   straight out from the body, every femur horizontal, every tibia hanging vertically.
+2. **Zeros** — like `leg_twister.ipynb`: the current pose is written into each servo's
+   EEPROM offset (register 31) so that it reads 2048. This replaces offsets set earlier
+   from the notebooks. Torque goes off; hold the robot in the air in the zero pose: every
+   coxa straight out from the body, every femur horizontal, every tibia hanging vertically.
    ```bash
-   python3 -m spider_pi.calibrate zero
+   python3 -m spider_pi.calibrate zero                       # all 18
+   python3 -m spider_pi.calibrate zero leg_lf_femur leg_lf_tibia   # or a few at a time
    ```
-3. **Directions.** For each joint (start with one leg):
+3. **Directions** — for each joint:
    ```bash
    python3 -m spider_pi.calibrate jog leg_lf_femur 0.3
    ```
    Positive must be: coxa counter-clockwise seen from above, femur knee up, tibia foot
    outward. If it went the other way, set `sign: -1` for that joint in `servos.yaml`.
-4. **Check.** `python3 -m spider_pi.calibrate read` prints live joint angles in degrees;
+   Left and right servos are usually mounted mirrored, so expect some `-1`.
+4. **Check** — `python3 -m spider_pi.calibrate read` prints live joint angles in degrees;
    in the zero pose all of them are about 0.
 
 ## Run
@@ -80,7 +87,8 @@ python3 -m pytest tests     # packet format, and the whole runtime over UDP on a
 
 ## Not verified on hardware yet
 
-Written against the Feetech STS protocol and the STS3215 register map, tested only on
-the fake bus. Things to watch on the first run: the sync read of positions (some
-firmware/adapters answer slowly; raise `timeout` in `StsBus`), and the speed scaling.
-Keep a hand on the power switch.
+Uses the same `scservo_sdk` calls as the notebooks (`ReadPos`, `SyncWritePosEx` +
+`groupSyncWrite.txPacket()`, offsets via register 31), checked against the SDK source and on
+a fake bus only. Positions are read 3 servos per control tick (`bus.reads_per_tick`) to keep
+the loop at 50 Hz; if the log shows the loop running late, lower it. Keep a hand on the
+power switch on the first run.

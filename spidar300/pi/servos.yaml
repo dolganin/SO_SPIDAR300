@@ -1,23 +1,26 @@
 # Servo bus id, encoder ticks at joint zero, and direction for every joint.
 # Joint zero and positive direction are defined in spider_description/config/legs.yaml.
-# Fill `zero` with `python3 -m spider_pi.calibrate zero`, check `sign` with `... jog`.
+# Ids: <side><leg><joint>, side 1 = left, 2 = right; leg 1 = front, 2 = middle, 3 = rear;
+# joint 1 = coxa, 2 = femur, 3 = tibia (numbering from numerate_motors.ipynb).
+# `python3 -m spider_pi.calibrate zero` writes each servo's EEPROM offset so the zero pose
+# reads 2048 (as in leg_twister.ipynb); `zero` stays 2048 then. Check `sign` with `... jog`.
 
 servos:
-  leg_lf_coxa: {id: 1, zero: 2048, sign: 1}
-  leg_lf_femur: {id: 2, zero: 2048, sign: 1}
-  leg_lf_tibia: {id: 3, zero: 2048, sign: 1}
-  leg_lm_coxa: {id: 4, zero: 2048, sign: 1}
-  leg_lm_femur: {id: 5, zero: 2048, sign: 1}
-  leg_lm_tibia: {id: 6, zero: 2048, sign: 1}
-  leg_lr_coxa: {id: 7, zero: 2048, sign: 1}
-  leg_lr_femur: {id: 8, zero: 2048, sign: 1}
-  leg_lr_tibia: {id: 9, zero: 2048, sign: 1}
-  leg_rf_coxa: {id: 10, zero: 2048, sign: 1}
-  leg_rf_femur: {id: 11, zero: 2048, sign: 1}
-  leg_rf_tibia: {id: 12, zero: 2048, sign: 1}
-  leg_rm_coxa: {id: 13, zero: 2048, sign: 1}
-  leg_rm_femur: {id: 14, zero: 2048, sign: 1}
-  leg_rm_tibia: {id: 15, zero: 2048, sign: 1}
-  leg_rr_coxa: {id: 16, zero: 2048, sign: 1}
-  leg_rr_femur: {id: 17, zero: 2048, sign: 1}
-  leg_rr_tibia: {id: 18, zero: 2048, sign: 1}
+  leg_lf_coxa: {id: 111, zero: 2048, sign: 1}
+  leg_lf_femur: {id: 112, zero: 2048, sign: 1}
+  leg_lf_tibia: {id: 113, zero: 2048, sign: 1}
+  leg_lm_coxa: {id: 121, zero: 2048, sign: 1}
+  leg_lm_femur: {id: 122, zero: 2048, sign: 1}
+  leg_lm_tibia: {id: 123, zero: 2048, sign: 1}
+  leg_lr_coxa: {id: 131, zero: 2048, sign: 1}
+  leg_lr_femur: {id: 132, zero: 2048, sign: 1}
+  leg_lr_tibia: {id: 133, zero: 2048, sign: 1}
+  leg_rf_coxa: {id: 211, zero: 2048, sign: 1}
+  leg_rf_femur: {id: 212, zero: 2048, sign: 1}
+  leg_rf_tibia: {id: 213, zero: 2048, sign: 1}
+  leg_rm_coxa: {id: 221, zero: 2048, sign: 1}
+  leg_rm_femur: {id: 222, zero: 2048, sign: 1}
+  leg_rm_tibia: {id: 223, zero: 2048, sign: 1}
+  leg_rr_coxa: {id: 231, zero: 2048, sign: 1}
+  leg_rr_femur: {id: 232, zero: 2048, sign: 1}
+  leg_rr_tibia: {id: 233, zero: 2048, sign: 1}

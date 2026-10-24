@@ -54,6 +54,8 @@ class Robot:
         self.q = np.zeros(len(self.names))
         self.v = np.zeros(len(self.names))
         self.measured: np.ndarray | None = None
+        self.ticks: dict[int, int] = {}            # latest present position per servo id
+        self.read_cursor = 0
         limits = [self.hexapod.limits[j] for _ in self.hexapod.legs for j in self.hexapod.joints]
         self.lo, self.hi = np.array([l for l, _ in limits]), np.array([h for _, h in limits])
         bad = self.servos.check_range(limits)
@@ -66,9 +68,11 @@ class Robot:
         missing = [i for i in self.servos.ids if not self.bus.ping(i)]
         if missing:
             raise RuntimeError(f"servos not answering: {missing}")
-        measured = self.servos.to_angles(self.bus.positions(self.servos.ids))
+        self.ticks = self.bus.positions(self.servos.ids)
+        measured = self.servos.to_angles(self.ticks)
         if measured is None:
-            raise RuntimeError("could not read servo positions")
+            missing = [c.joint for c in self.servos.cal if c.id not in self.ticks]
+            raise RuntimeError(f"could not read servo positions: {missing}")
         self.limiter.last = measured
         self.measured = measured
         self.bus.torque(self.servos.ids, True)
@@ -148,10 +152,18 @@ class Robot:
         speeds = [max(MIN_SPEED_TICKS, int(s * 1.3)) for s in self.servos.speeds(self.v)]
         self.bus.move(dict(zip(self.servos.ids, zip(ticks, speeds))))
 
-    def publish_state(self) -> None:
-        measured = self.servos.to_angles(self.bus.positions(self.servos.ids))
+    def read_some(self) -> None:
+        """Read a few servos per tick (round robin) so the bus never stalls the 50 Hz loop."""
+        n = int(self.cfg["bus"].get("reads_per_tick", 3))
+        ids = self.servos.ids
+        batch = [ids[(self.read_cursor + k) % len(ids)] for k in range(min(n, len(ids)))]
+        self.read_cursor = (self.read_cursor + len(batch)) % len(ids)
+        self.ticks.update(self.bus.positions(batch))
+        measured = self.servos.to_angles(self.ticks)
         if measured is not None:
             self.measured = measured
+
+    def publish_state(self) -> None:
         self.send({"type": "state", "mode": self.gait.mode.value, "names": self.names,
                    "position": [round(float(x), 4) for x in (self.measured if self.measured is not None else self.q)],
                    "command": [round(float(x), 4) for x in self.q]})
@@ -174,6 +186,7 @@ class Robot:
             if self.gait.mode is not mode:
                 mode = self.gait.mode
                 log.info("mode: %s", mode.value)
+            self.read_some()
             tick += 1
             if tick % state_every == 0:
                 self.publish_state()

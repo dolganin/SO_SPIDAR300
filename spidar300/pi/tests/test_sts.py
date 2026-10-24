@@ -1,43 +1,86 @@
+"""StsBus on a stub of scservo_sdk.sms_sts (same calls as leg_twister.ipynb)."""
 from spider_pi import sts
 
 
-def test_ping_packet():
-    # Feetech manual example: ping id 1
-    assert sts.packet(1, sts.PING) == bytes([0xFF, 0xFF, 0x01, 0x02, 0x01, 0xFB])
+class StubSdk:
+    """Minimal sms_sts: positions, EEPROM offset (sign bit 11), sync write."""
+
+    def __init__(self, raw):
+        self.raw = dict(raw)                 # encoder before offset
+        self.offset = {i: 0 for i in raw}
+        self.locked = {i: True for i in raw}
+        self.synced = []
+        self.packets = []
+        sdk = self
+
+        class Group:
+            def txPacket(self):
+                sdk.packets.append(list(sdk.synced))
+                return 0
+
+            def clearParam(self):
+                sdk.synced.clear()
+
+        self.groupSyncWrite = Group()
+
+    @staticmethod
+    def scs_toscs(a, b):
+        return (-a | (1 << b)) if a < 0 else a
+
+    def ping(self, i):
+        return 777, (0 if i in self.raw else -6), 0
+
+    def ReadPos(self, i):
+        if i not in self.raw:
+            return 0, -6, 0
+        return (self.raw[i] - self.offset[i]) % 4096, 0, 0
+
+    def SyncWritePosEx(self, i, pos, speed, acc):
+        self.synced.append((i, pos, speed, acc))
+        return True
+
+    def write1ByteTxRx(self, i, addr, value):
+        return 0, 0
+
+    def write2ByteTxRx(self, i, addr, value):
+        assert not self.locked[i], "EEPROM must be unlocked"
+        if addr == sts.ADDR_OFFSET:
+            self.offset[i] = -(value & 0x7FF) if value & (1 << 11) else value
+        return 0, 0
+
+    def unLockEprom(self, i):
+        self.locked[i] = False
+
+    def LockEprom(self, i):
+        self.locked[i] = True
 
 
-def test_sync_write_layout():
-    class Port:
-        def __init__(self):
-            self.data = b""
-        def write(self, d):
-            self.data += d
-        def flush(self):
-            pass
-
+def bus_with(raw):
     bus = sts.StsBus.__new__(sts.StsBus)
-    bus.serial = Port()
-    bus.move({1: (2048, 100), 2: (1000, 50)})
-    d = bus.serial.data
-    assert d[:5] == bytes([0xFF, 0xFF, sts.BROADCAST, 4 + 2 * 7, sts.SYNC_WRITE])
-    assert d[5:7] == bytes([sts.GOAL_POSITION, 6])
-    assert d[7:14] == bytes([1]) + (2048).to_bytes(2, "little") + b"\0\0" + (100).to_bytes(2, "little")
-    assert d[-1] == sts.checksum(d[2:-1])
+    bus.sdk = StubSdk(raw)
+    bus.acc = 0
+    return bus
 
 
-def test_receive_skips_noise_and_other_ids():
-    class Port:
-        def __init__(self, data):
-            self.buf = data
-            self.in_waiting = len(data)
-        def read(self, n):
-            out, self.buf = self.buf[:n], self.buf[n:]
-            self.in_waiting = len(self.buf)
-            return out
+def test_move_is_one_sync_packet():
+    bus = bus_with({111: 0, 112: 0})
+    bus.move({111: (2048, 100), 112: (1000, 50)})
+    assert bus.sdk.packets == [[(111, 2048, 100, 0), (112, 1000, 50, 0)]]
+    assert bus.sdk.synced == []
 
-    reply_2 = sts.packet(2, 0x00, b"\x34\x12")
-    reply_3 = sts.packet(3, 0x00, b"\x00\x08")
-    bus = sts.StsBus.__new__(sts.StsBus)
-    bus.timeout = 0.05
-    bus.serial = Port(b"\x00\xff" + reply_2 + reply_3)
-    assert bus._receive(3) == (0x00, b"\x00\x08")
+
+def test_positions_skip_silent_servos():
+    bus = bus_with({111: 1234})
+    assert bus.positions([111, 999]) == {111: 1234}
+
+
+def test_center_here_positive_negative_and_wrapping():
+    # 3561 and 2373 are from leg_twister.ipynb; 4 is a tibia sitting next to the 0/4095 wrap
+    bus = bus_with({112: 3561, 132: 2373, 113: 4, 123: 1000})
+    for i in (112, 132, 113, 123):
+        bus.center_here(i)
+        assert bus.positions([i]) == {i: 2048}
+        assert abs(bus.sdk.offset[i]) <= 2047
+        assert bus.sdk.locked[i]
+    assert bus.sdk.offset[112] == 1513
+    assert bus.sdk.offset[123] == -1048
