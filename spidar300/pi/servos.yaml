@@ -8,19 +8,19 @@
 servos:
   leg_lf_coxa: {id: 111, zero: 2048, sign: 1}
   leg_lf_femur: {id: 112, zero: 2048, sign: 1}
-  leg_lf_tibia: {id: 113, zero: 2048, sign: 1}
+  leg_lf_tibia: {id: 113, zero: 2048, sign: -1}
   leg_lm_coxa: {id: 121, zero: 2048, sign: 1}
   leg_lm_femur: {id: 122, zero: 2048, sign: 1}
-  leg_lm_tibia: {id: 123, zero: 2048, sign: 1}
+  leg_lm_tibia: {id: 123, zero: 2048, sign: -1}
   leg_lr_coxa: {id: 131, zero: 2048, sign: 1}
   leg_lr_femur: {id: 132, zero: 2048, sign: 1}
-  leg_lr_tibia: {id: 133, zero: 2048, sign: 1}
+  leg_lr_tibia: {id: 133, zero: 2048, sign: -1}
   leg_rf_coxa: {id: 211, zero: 2048, sign: 1}
   leg_rf_femur: {id: 212, zero: 2048, sign: 1}
-  leg_rf_tibia: {id: 213, zero: 2048, sign: 1}
+  leg_rf_tibia: {id: 213, zero: 2048, sign: -1}
   leg_rm_coxa: {id: 221, zero: 2048, sign: 1}
   leg_rm_femur: {id: 222, zero: 2048, sign: 1}
-  leg_rm_tibia: {id: 223, zero: 2048, sign: 1}
+  leg_rm_tibia: {id: 223, zero: 2048, sign: -1}
   leg_rr_coxa: {id: 231, zero: 2048, sign: 1}
   leg_rr_femur: {id: 232, zero: 2048, sign: 1}
-  leg_rr_tibia: {id: 233, zero: 2048, sign: 1}
+  leg_rr_tibia: {id: 233, zero: 2048, sign: -1}

@@ -4,7 +4,9 @@
   python3 -m spider_pi.calibrate set-id OLD NEW       renumber (only that servo connected)
   python3 -m spider_pi.calibrate zero [JOINT...]      torque off, pose by hand, write EEPROM offsets
   python3 -m spider_pi.calibrate read                 live joint angles from the encoders
-  python3 -m spider_pi.calibrate jog JOINT [DELTA]    move one joint by DELTA rad to check its sign
+  python3 -m spider_pi.calibrate jog JOINT [DELTA]    turn one joint by DELTA rad (sign = direction) and hold
+  python3 -m spider_pi.calibrate jog JOINT --to DEG   turn one joint to an angle and hold
+  python3 -m spider_pi.calibrate release [JOINT...]   torque off (all 18 by default)
 
 Zero pose (legs.yaml): every coxa points straight out from the body, every femur is
 horizontal, every tibia hangs vertically. Hold the robot in the air.
@@ -119,32 +121,53 @@ def cmd_read(cfg, args) -> None:
         pass
 
 
+JOG_SPEED = 0.5             # rad/s
+EXPECTED = {"coxa": "counter-clockwise (seen from above)", "femur": "knee UP", "tibia": "foot OUTWARD"}
+
+
 def cmd_jog(cfg, args) -> None:
-    names = Hexapod.load(cfg["legs"]).joint_names
+    """Turn one joint by DELTA (or to --to ANGLE) and stay there with torque on; never past legs.yaml limits."""
+    hexapod = Hexapod.load(cfg["legs"])
+    names = hexapod.joint_names
     if args.joint not in names:
         raise SystemExit(f"unknown joint {args.joint}; one of {names}")
-    servos = ServoMap(cfg["servos"], names)
-    cal = servos.cal[names.index(args.joint)]
-    bus = open_bus(cfg)
-    q = servos.to_angles(bus.positions(servos.ids))
-    if q is None:
-        raise SystemExit("could not read servo positions")
-    i = names.index(args.joint)
-    start = q[i]
-    target = start + args.delta
-    speed = int(0.5 * 4096 / (2 * math.pi))
-    goal = servos.to_ticks([target] * len(names))[i]
-    bus.torque([cal.id], True)
-    bus.move({cal.id: (goal, speed)})
-    time.sleep(abs(args.delta) / 0.5 + 0.5)
-    expected = {"coxa": "counter-clockwise (seen from above)", "femur": "knee UP", "tibia": "foot OUTWARD"}
     part = args.joint.rsplit("_", 1)[1]
-    print(f"{args.joint}: {math.degrees(start):+.1f} -> {math.degrees(target):+.1f} deg.")
-    print(f"For a positive DELTA it should have moved {expected[part]}; if not, flip its sign in servos.yaml.")
-    if not args.hold:
-        bus.move({cal.id: (servos.to_ticks([start] * len(names))[i], speed)})
-        time.sleep(abs(args.delta) / 0.5 + 0.5)
-        bus.torque([cal.id], False)
+    lo, hi = hexapod.limits[part]
+    servos = ServoMap(cfg["servos"], names)
+    i = servos.index(args.joint)
+    cal = servos.cal[i]
+    bus = open_bus(cfg)
+    ticks = bus.positions([cal.id])
+    if cal.id not in ticks:
+        raise SystemExit(f"servo {cal.id} does not answer")
+    start = cal.sign * (ticks[cal.id] - cal.zero) / TICKS_PER_RAD
+    wanted = math.radians(args.to) if args.to is not None else start + args.delta
+    # never further outside the limits than the joint already is
+    target = min(max(wanted, min(lo, start)), max(hi, start))
+    if abs(target - wanted) > 1e-6:
+        print(f"limit: {args.joint} allowed {math.degrees(lo):+.0f}..{math.degrees(hi):+.0f} deg; "
+              f"going to {math.degrees(target):+.1f} instead of {math.degrees(wanted):+.1f}")
+    goal = int(round(cal.zero + cal.sign * target * TICKS_PER_RAD))
+    bus.torque([cal.id], True)
+    bus.move({cal.id: (goal, int(JOG_SPEED * TICKS_PER_RAD))})
+    time.sleep(abs(target - start) / JOG_SPEED + 0.3)
+    print(f"{args.joint} (id {cal.id}): {math.degrees(start):+.1f} -> {math.degrees(target):+.1f} deg, "
+          f"holding (torque on; `release` to let go)")
+    if target != start:
+        way = "positive" if target > start else "negative"
+        print(f"moved {way}: positive should be {EXPECTED[part]}; if it went the other way, "
+              f"set sign: {-cal.sign} for {args.joint} in servos.yaml")
+
+
+def cmd_release(cfg, args) -> None:
+    names = Hexapod.load(cfg["legs"]).joint_names
+    servos = ServoMap(cfg["servos"], names)
+    joints = args.joints or names
+    unknown = [j for j in joints if j not in names]
+    if unknown:
+        raise SystemExit(f"unknown joints {unknown}")
+    open_bus(cfg).torque([servos.cal[servos.index(j)].id for j in joints], False)
+    print(f"torque off: {', '.join(joints) if args.joints else 'all 18 servos'}")
 
 
 def main(argv=None) -> None:
@@ -162,11 +185,14 @@ def main(argv=None) -> None:
     sub.add_parser("read")
     p = sub.add_parser("jog")
     p.add_argument("joint")
-    p.add_argument("delta", type=float, nargs="?", default=0.3)
-    p.add_argument("--hold", action="store_true", help="stay at the new angle with torque on")
+    p.add_argument("delta", type=float, nargs="?", default=0.3, help="rad, sign = direction (default 0.3)")
+    p.add_argument("--to", type=float, help="go to this angle in degrees instead (e.g. --to 0)")
+    p = sub.add_parser("release")
+    p.add_argument("joints", nargs="*", help="only these joints (default: all 18)")
     args = parser.parse_args(argv)
     cfg = load_config(args.config.resolve())
-    {"scan": cmd_scan, "set-id": cmd_set_id, "zero": cmd_zero, "read": cmd_read, "jog": cmd_jog}[args.cmd](cfg, args)
+    {"scan": cmd_scan, "set-id": cmd_set_id, "zero": cmd_zero, "read": cmd_read, "jog": cmd_jog,
+     "release": cmd_release}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":
