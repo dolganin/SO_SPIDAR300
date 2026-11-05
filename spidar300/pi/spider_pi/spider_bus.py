@@ -20,6 +20,11 @@ class SpiderBus:
         self.default_positions = dict(self.spider._default_positions)
         self.position_errors = {}
 
+    def configure_defaults(self, positions):
+        """Set this Spider instance's targets from measured software zeros."""
+        self.default_positions = dict(positions)
+        self.spider._default_positions = dict(positions)
+
     def close(self):
         self.spider._port_handler.closePort()
 

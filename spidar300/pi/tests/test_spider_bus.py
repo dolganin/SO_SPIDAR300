@@ -87,3 +87,15 @@ def test_position_error_is_preserved_and_cleared_on_recovery():
     assert bus.position_errors == {113: "Servo 113 returned error: 32"}
     assert bus.positions([113]) == {113: 1911}
     assert not bus.position_errors
+
+
+def test_measured_defaults_replace_only_instance_targets():
+    spider = Mock()
+    spider._default_positions = {113: 700}
+    bus = SpiderBus("unused", spider=spider)
+    bus.configure_defaults({113: 2920})
+    assert bus.default_positions == {113: 2920}
+    assert spider._default_positions == {113: 2920}
+    assert spider.mock_calls == []
+    bus.default()
+    spider.move_to_default_position.assert_called_once_with(speed=2000, acc=0, blocking=False)

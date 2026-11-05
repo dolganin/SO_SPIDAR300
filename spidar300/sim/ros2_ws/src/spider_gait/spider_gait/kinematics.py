@@ -103,6 +103,7 @@ class Hexapod:
         self.legs: list[str] = [m.name for m in self.mounts]
         self.geometry = LegGeometry.from_config(config["geometry"])
         self.limits = {j: tuple(config["limits"][j]) for j in self.joints}
+        self.joint_limits = {}  # optional per-joint hardware bounds, keyed by joint name
         self.max_velocity = float(config["servo"]["velocity"])
         self.foot_radius = float(config["geometry"].get("foot_radius", 0.0))
         rest = config.get("rest_pose", {})
@@ -128,7 +129,7 @@ class Hexapod:
         """Joint angles for a foot point in base_link; False if unreachable or past a joint limit."""
         q, ok = self.geometry.inverse(self.mount(leg).to_leg(p_body))
         for i, j in enumerate(self.joints):
-            lo, hi = self.limits[j]
+            lo, hi = self.joint_limits.get(joint_name(leg, j), self.limits[j])
             if not lo <= q[i] <= hi:
                 ok = False
                 q[i] = min(hi, max(lo, q[i]))

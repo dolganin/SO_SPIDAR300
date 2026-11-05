@@ -2,25 +2,29 @@
 # Joint zero and positive direction are defined in spider_description/config/legs.yaml.
 # Ids: <side><leg><joint>, side 1 = left, 2 = right; leg 1 = front, 2 = middle, 3 = rear;
 # joint 1 = coxa, 2 = femur, 3 = tibia (numbering from numerate_motors.ipynb).
-# Tuned Spider._default_positions are the geometric zero. Startup never rewrites EEPROM.
+# Software reference measured on 2026-11-05, rounded to 10 ticks (2048 kept).
+# Femur horizontal, tibia vertical; coxa yaw reference is the user-positioned pose.
+# Motor directions still require physical verification. No EEPROM writes.
 # These ticks assume the existing servo EEPROM offsets are unchanged.
 
 servos:
-  leg_lf_coxa: {id: 111, zero: 2500, sign: 1}
-  leg_lf_femur: {id: 112, zero: 2048, sign: 1}
-  leg_lf_tibia: {id: 113, zero: 700, sign: 1}
+  leg_lf_coxa: {id: 111, zero: 2180, sign: 1}
+  leg_lf_femur: {id: 112, zero: 2020, sign: 1}
+  leg_lf_tibia: {id: 113, zero: 2920, sign: -1}
   leg_lm_coxa: {id: 121, zero: 2048, sign: 1}
-  leg_lm_femur: {id: 122, zero: 2048, sign: 1}
-  leg_lm_tibia: {id: 123, zero: 700, sign: 1}
-  leg_lr_coxa: {id: 131, zero: 1500, sign: 1}
-  leg_lr_femur: {id: 132, zero: 2048, sign: 1}
-  leg_lr_tibia: {id: 133, zero: 700, sign: 1}
-  leg_rf_coxa: {id: 211, zero: 1500, sign: 1}
-  leg_rf_femur: {id: 212, zero: 2048, sign: 1}
-  leg_rf_tibia: {id: 213, zero: 700, sign: 1}
-  leg_rm_coxa: {id: 221, zero: 2048, sign: 1}
-  leg_rm_femur: {id: 222, zero: 2048, sign: 1}
-  leg_rm_tibia: {id: 223, zero: 700, sign: 1}
-  leg_rr_coxa: {id: 231, zero: 2500, sign: 1}
-  leg_rr_femur: {id: 232, zero: 2048, sign: 1}
-  leg_rr_tibia: {id: 233, zero: 700, sign: 1}
+  leg_lm_femur: {id: 122, zero: 2080, sign: 1}
+  leg_lm_tibia: {id: 123, zero: 2000, sign: -1}
+  leg_lr_coxa: {id: 131, zero: 2000, sign: 1}
+  leg_lr_femur: {id: 132, zero: 1930, sign: 1}
+  leg_lr_tibia: {id: 133, zero: 1780, sign: -1, limits: {max: 1.15}}
+  leg_rf_coxa: {id: 211, zero: 1920, sign: 1}
+  leg_rf_femur: {id: 212, zero: 2080, sign: 1}
+  leg_rf_tibia: {id: 213, zero: 2150, sign: -1}
+  leg_rm_coxa: {id: 221, zero: 2040, sign: 1}
+  leg_rm_femur: {id: 222, zero: 2120, sign: 1}
+  # Provisional max: leaves ~72 ticks before observed stall at 1041.
+  leg_rm_tibia: {id: 223, zero: 1960, sign: -1, limits: {max: 1.30}}
+  leg_rr_coxa: {id: 231, zero: 1990, sign: 1}
+  leg_rr_femur: {id: 232, zero: 2030, sign: 1}
+  # Provisional max: leaves ~51 ticks before observed stall at 1049.
+  leg_rr_tibia: {id: 233, zero: 2000, sign: -1, limits: {max: 1.38}}

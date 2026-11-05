@@ -2,6 +2,7 @@
 
 python3 -m spider_pi.calibrate default   # Enter, original default, hold
 python3 -m spider_pi.calibrate read      # read positions
+python3 -m spider_pi.calibrate jog leg_lf_tibia 0.1  # small relative move, radians
 python3 -m spider_pi.calibrate inspect   # read register snapshot
 python3 -m spider_pi.calibrate release  # disable torque
 python3 -m spider_pi.calibrate scan     # check configured IDs
@@ -39,22 +40,68 @@ def read_table(hexapod: Hexapod, servos: ServoMap, ticks: dict[int, int]) -> lis
 
 
 
+def jog(bus, robot, servos, joint, delta):
+    """One small relative movement through the existing Spider methods."""
+    if joint not in robot.joint_names:
+        raise ValueError(f"unknown joint: {joint}")
+    if not math.isfinite(delta) or not 0 < abs(delta) <= 0.15:
+        raise ValueError("delta must be nonzero and at most 0.15 rad (8.6 degrees)")
+    c = servos.cal[servos.index(joint)]
+    input(f"{joint} id={c.id}: move {math.degrees(delta):+.1f} degrees. Feet clear; Enter = move: ")
+    positions = bus.positions([c.id])
+    if c.id not in positions:
+        raise IOError(f"cannot read servo {c.id}: {getattr(bus, 'position_errors', {})}")
+    start = positions[c.id]
+    goal = start + round(c.sign * delta * TICKS_PER_RAD)
+    lo, hi = robot.limits[joint.rsplit("_", 1)[1]]
+    lo, hi = max(lo, c.min_angle), min(hi, c.max_angle)
+    angle = c.sign * (goal - c.zero) / TICKS_PER_RAD
+    if not 0 <= goal <= 4095 or not lo <= angle <= hi:
+        raise ValueError("requested move is outside the encoder or model limits")
+    print(f"{joint}: {start} -> {goal} ticks", flush=True)
+    try:
+        # Install the measured goal before enabling torque to avoid a stale target.
+        bus.move({c.id: (start, 100)})
+        bus.torque([c.id], True)
+        bus.move({c.id: (goal, 100)})
+        deadline = time.monotonic() + 3.0
+        while time.monotonic() < deadline:
+            measured = bus.positions([c.id]).get(c.id)
+            if measured is None:
+                raise IOError(f"cannot read servo {c.id}: {getattr(bus, 'position_errors', {})}")
+            if abs(measured - goal) <= 5:
+                print(f"Reached {measured}; holding. No calibration changes.")
+                return
+            time.sleep(0.05)
+        raise TimeoutError(f"servo {c.id} did not reach {goal}; last position {measured}")
+    except BaseException:
+        bus.torque([c.id], False)
+        raise
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--config", type=Path, default=_HERE / "config.yaml")
-    parser.add_argument("cmd", choices=["default", "read", "inspect", "release", "scan"])
+    parser.add_argument("cmd", choices=["default", "read", "inspect", "release", "scan", "jog"])
+    parser.add_argument("joint", nargs="?", help="joint for jog, e.g. leg_lf_tibia")
+    parser.add_argument("delta", nargs="?", type=float, default=0.1, help="relative jog angle in radians")
     args = parser.parse_args(argv)
+    if args.cmd == "jog" and args.joint is None:
+        parser.error("jog requires a joint name")
+    if args.cmd != "jog" and args.joint is not None:
+        parser.error("joint and delta are only supported for jog")
     cfg = load_config(args.config.resolve())
     bus = SpiderBus(cfg["bus"]["port"])
     try:
         robot = Hexapod.load(cfg["legs"])
         servos = ServoMap(cfg["servos"], robot.joint_names)
-        for c in servos.cal:
-            c.zero = bus.default_positions[c.id]
-        if args.cmd == "default":
-            input("Place belly on the support, feet clear. Enter = original Spider default: ")
+        bus.configure_defaults({c.id: c.zero for c in servos.cal})
+        if args.cmd == "jog":
+            jog(bus, robot, servos, args.joint, args.delta)
+        elif args.cmd == "default":
+            input("Place belly on the support, feet clear. Enter = measured reference via Spider: ")
             bus.default(blocking=True)
-            print("Spider default reached; torque stays on; no further movement")
+            print("Measured reference reached via Spider; torque stays on; no further movement")
         elif args.cmd == "release":
             bus.torque(servos.ids, False)
         elif args.cmd == "scan":
@@ -63,9 +110,23 @@ def main(argv=None):
             for c in servos.cal:
                 print(f"{c.joint} id={c.id}: {bus.diagnostics([c.id])[c.id]}")
         else:
-            while True:
-                print("\n".join(read_table(robot, servos, bus.positions(servos.ids))), flush=True)
-                time.sleep(0.5)
+            terminal = sys.stdout.isatty()
+            if terminal:
+                sys.stdout.write("\x1b[2J\x1b[H\x1b[?25l")
+                sys.stdout.flush()
+            try:
+                while True:
+                    table = "\n".join(read_table(robot, servos, bus.positions(servos.ids)))
+                    if terminal:
+                        sys.stdout.write("\x1b[H" + table + "\nCtrl+C — stop reading\x1b[J")
+                        sys.stdout.flush()
+                    else:
+                        print(table, flush=True)
+                    time.sleep(0.5)
+            finally:
+                if terminal:
+                    sys.stdout.write("\x1b[?25h\n")
+                    sys.stdout.flush()
     except KeyboardInterrupt:
         pass
     finally:

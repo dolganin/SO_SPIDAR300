@@ -109,3 +109,29 @@ recipe reproduces its separate test of IDs 113/123/133 at 1000, speed=300, acc=5
 Offset-writing experiment cells are excluded. Errors propagate visibly; on an
 error or Ctrl-C during execution, the module requests torque off and closes the port.
 Stop all other programs using the servo port before replay.
+
+## Measured software reference (2026-11-05)
+
+`servos.yaml` now contains the latest user-positioned reference, rounded to 10
+encoder ticks (2048 preserved). Runtime and `calibrate` use these values for
+angle zero and configure the existing Spider instance's default targets with
+them. The original class file and servo EEPROM are unchanged. `notebook_replay`
+still executes the historical notebooks and their old targets, including tibia
+700; do not use it to move to the new measured reference.
+
+Use `calibrate read` first: in the reference pose the reported angles should be
+near zero. `calibrate default` moves to the new reference using the original
+Spider method. The configured coxa zero is the supplied physical pose; its yaw
+alignment with the simulated radial mounts and all motor directions still need
+verification before full IK movements.
+
+## Individual mechanical limits
+
+`servos.yaml` supports `limits: {min: ..., max: ...}` in radians relative to the
+measured reference, in the model's positive direction. For left rear tibia 133,
+the observed physical stop was about 975 ticks; max=1.15 sets the commanded
+limit to about 1030 ticks, leaving approximately 5 degrees of clearance.
+The runtime intersects this with model/encoder limits before constructing the
+gait. Startup and lie-down poses are clipped per leg, IK uses the same bounds,
+and the jog utility rejects movements past the configured stop. Other legs
+retain their existing limits; their physical stops have not been measured.

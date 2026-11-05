@@ -44,11 +44,26 @@ class Robot:
         self.hexapod = Hexapod.load(cfg["legs"])
         self.names = self.hexapod.joint_names
         self.servos = ServoMap(cfg["servos"], self.names)
-        if hasattr(bus, "default_positions"):
-            for c in self.servos.cal:
-                c.zero = bus.default_positions[c.id]
+        defaults = {c.id: c.zero for c in self.servos.cal}
+        if hasattr(bus, "configure_defaults"):
+            bus.configure_defaults(defaults)
         else:
-            bus.default_positions = {c.id: c.zero for c in self.servos.cal}
+            bus.default_positions = defaults
+        limits = [self.hexapod.limits[j] for _ in self.hexapod.legs for j in self.hexapod.joints]
+        self.lo, self.hi = np.array([l for l, _ in limits]), np.array([h for _, h in limits])
+        # Intersect geometric limits with the encoder's single-turn range.
+        for i, c in enumerate(self.servos.cal):
+            ends = sorted(((0 - c.zero) / (c.sign * TICKS_PER_RAD),
+                           (4095 - c.zero) / (c.sign * TICKS_PER_RAD)))
+            self.lo[i] = max(self.lo[i], ends[0], c.min_angle)
+            self.hi[i] = min(self.hi[i], ends[1], c.max_angle)
+        bad = self.servos.check_range(limits)
+        if bad:
+            log.warning("joint limits leave the 0..4095 servo range (check zero/sign): %s", bad)
+        self.hexapod.joint_limits = {
+            name: (self.lo[i], self.hi[i]) for i, name in enumerate(self.names)
+        }
+
         params = GaitParams(**{k: float(v) for k, v in cfg.get("gait", {}).items()})
         self.gait = TripodGait(self.hexapod, params)
         self.limiter = JointRateLimiter(float(cfg["startup_velocity"]))
@@ -64,17 +79,6 @@ class Robot:
         self.measured: np.ndarray | None = None
         self.ticks: dict[int, int] = {}            # latest present position per servo id
         self.read_cursor = 0
-        limits = [self.hexapod.limits[j] for _ in self.hexapod.legs for j in self.hexapod.joints]
-        self.lo, self.hi = np.array([l for l, _ in limits]), np.array([h for _, h in limits])
-        # Intersect geometric limits with the encoder's single-turn range.
-        for i, c in enumerate(self.servos.cal):
-            ends = sorted(((0 - c.zero) / (c.sign * TICKS_PER_RAD),
-                           (4095 - c.zero) / (c.sign * TICKS_PER_RAD)))
-            self.lo[i] = max(self.lo[i], ends[0])
-            self.hi[i] = min(self.hi[i], ends[1])
-        bad = self.servos.check_range(limits)
-        if bad:
-            log.warning("joint limits leave the 0..4095 servo range (check zero/sign): %s", bad)
 
     # -- startup / shutdown ----------------------------------------------------------
 
@@ -98,7 +102,7 @@ class Robot:
             measured = self.servos.to_angles(ticks)
             if measured is None:
                 return False, "cannot read all servos; startup not approved"
-            goals = self.servos.to_ticks(np.tile(self.hexapod.rest_pose, len(self.hexapod.legs)))
+            goals = self.servos.to_ticks(np.concatenate([self.gait.rest[leg] for leg in self.hexapod.legs]))
             if any(t < 0 or t > 4095 for t in goals):
                 return False, "lying pose outside encoder range; check zero/sign"
             self.bus.default()
@@ -187,7 +191,7 @@ class Robot:
             return
         if self.startup in ("moving_default", "lifting_legs"):
             target = (np.zeros(len(self.names)) if self.startup == "moving_default"
-                      else np.tile(self.hexapod.rest_pose, len(self.hexapod.legs)))
+                      else np.concatenate([self.gait.rest[leg] for leg in self.hexapod.legs]))
         else:
             q = self.gait.step(dt)
             target = np.concatenate([q[leg] for leg in self.hexapod.legs])

@@ -73,7 +73,7 @@ def test_full_cycle(setup):
     prepare(robot, client, addr)
     assert not robot.starting, "should reach the rest pose"
     servos = ServoMap(robot.cfg["servos"], robot.names)
-    rest = np.tile(robot.hexapod.rest_pose, 6)
+    rest = np.concatenate([robot.gait.rest[leg] for leg in robot.hexapod.legs])
     np.testing.assert_allclose(servos.to_angles(bus.pos), rest, atol=2e-3)
 
     assert call(client, addr, {"type": "stand_up"})["ok"]
@@ -196,3 +196,32 @@ def test_default_automatically_continues_from_measured_pose():
         assert robot.approve_startup()[0]
         assert robot.startup == "ready"
         assert robot.gait.stand_up()[0]
+
+
+def test_measured_stop_applies_to_rest_and_ik():
+    cfg = load_config(CONFIG)
+    ids = [c["id"] for c in yaml.safe_load(open(cfg["servos"]))["servos"].values()]
+    bus = FakeBus(ids)
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        robot = Robot(cfg, bus, sock)
+        i = robot.names.index("leg_lr_tibia")
+        assert robot.hi[i] == 1.15
+        assert robot.gait.rest["lr"][2] == 1.15
+        assert robot.gait.rest["lf"][2] == 1.5
+        # A reachable geometric request beyond the hardware limit is clipped
+        # inside IK and reported as outside the available joint range.
+        foot = robot.hexapod.foot("lr", [0, 0, 1.5])
+        q, ok = robot.hexapod.solve("lr", foot)
+        assert not ok and q[2] <= 1.15
+        rest = np.concatenate([robot.gait.rest[leg] for leg in robot.hexapod.legs])
+        assert robot.servos.to_ticks(rest)[i] == 1030
+        for name, maximum, expected_ticks in [
+            ("leg_rm_tibia", 1.30, 1113), ("leg_rr_tibia", 1.38, 1100)
+        ]:
+            index = robot.names.index(name)
+            assert robot.hi[index] == maximum
+            assert robot.servos.to_ticks(rest)[index] == expected_ticks
+            leg = name.split("_")[1]
+            target = robot.hexapod.foot(leg, [0, 0, 1.5])
+            angles, reachable = robot.hexapod.solve(leg, target)
+            assert not reachable and angles[2] <= maximum

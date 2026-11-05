@@ -19,6 +19,8 @@ class ServoCal:
     id: int
     zero: int        # ticks at joint angle 0
     sign: int        # +1 if servo ticks grow with the joint angle, else -1
+    min_angle: float = -math.inf
+    max_angle: float = math.inf
 
 
 class ServoMap:
@@ -29,7 +31,12 @@ class ServoMap:
         missing = [j for j in joint_names if j not in raw]
         if missing:
             raise ValueError(f"{self.path}: no servo for {missing}")
-        self.cal = [ServoCal(j, int(raw[j]["id"]), int(raw[j]["zero"]), int(raw[j]["sign"])) for j in joint_names]
+        self.cal = [ServoCal(j, int(raw[j]["id"]), int(raw[j]["zero"]), int(raw[j]["sign"]),
+                             float(raw[j].get("limits", {}).get("min", -math.inf)),
+                             float(raw[j].get("limits", {}).get("max", math.inf))) for j in joint_names]
+        for c in self.cal:
+            if math.isnan(c.min_angle) or math.isnan(c.max_angle) or not c.min_angle <= 0 <= c.max_angle:
+                raise ValueError(f"{c.joint}: limits must contain the reference angle zero")
         self.ids = [c.id for c in self.cal]
         self._index = {c.joint: i for i, c in enumerate(self.cal)}
 

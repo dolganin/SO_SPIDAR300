@@ -111,3 +111,36 @@ def test_lie_down_returns_to_rest(gait):
     for leg in gait.robot.legs:
         np.testing.assert_allclose(gait.q[leg], gait.robot.rest_pose, atol=1e-9)
     assert gait.stand_up()[0]
+
+
+def test_stand_up_never_starts_walking_without_velocity_command():
+    g = TripodGait(Hexapod.load(CONFIG), GaitParams(tuck_time=0.5, rise_time=0.5))
+    assert g.stand_up()[0]
+    for _ in range(200):
+        g.step(DT)
+        assert not g.walking
+    assert g.mode is Mode.STANDING
+    assert g.reach == g.params.rise_reach
+    feet = {leg: f.copy() for leg, f in g.feet.items()}
+    run(g, 1.0)
+    for leg, foot in feet.items():
+        np.testing.assert_allclose(g.feet[leg], foot, atol=1e-9)
+    g.set_command(0.03, 0, 0)
+    g.step(DT)
+    assert g.walking
+    assert g.reach == g.params.stance_reach
+
+
+def test_velocity_during_posture_transition_does_not_queue_walking():
+    g = TripodGait(Hexapod.load(CONFIG), GaitParams(tuck_time=0.5, rise_time=0.5))
+    g.set_command(0.05, 0, 0)
+    assert not g.cmd.any()
+    g.stand_up()
+    for _ in range(50):
+        g.set_command(0.05, 0, 0)
+        g.step(DT)
+    assert not g.cmd.any()
+    for _ in range(100):
+        g.step(DT)
+        assert not g.walking
+    assert g.mode is Mode.STANDING

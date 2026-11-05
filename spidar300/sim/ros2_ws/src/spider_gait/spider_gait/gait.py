@@ -7,8 +7,9 @@ come from the analytic IK; joint speed is limited by JointRateLimiter.
 
 The robot starts LYING on its belly with the legs spread out (rest_pose in
 legs.yaml). stand_up(): joints blend to feet just above the ground at rise_reach,
-then the feet press straight down to body_height, then the gait steps the feet in
-to stance_reach. lie_down() runs the same in reverse.
+then the feet press straight down to body_height and hold the wide support.
+The first walking command brings the feet to stance_reach. lie_down() widens
+the support before lowering the body.
 """
 from __future__ import annotations
 
@@ -74,7 +75,12 @@ class TripodGait:
         self.walking = False
         self.phase = 0.0
         self.segments: list[_Segment] = []
-        self.rest = {leg: robot.rest_pose.copy() for leg in robot.legs}
+        self.rest = {
+            leg: np.array([np.clip(robot.rest_pose[i],
+                                   *robot.joint_limits.get(f"leg_{leg}_{j}", robot.limits[j]))
+                           for i, j in enumerate(robot.joints)])
+            for leg in robot.legs
+        }
         self.q = {leg: q.copy() for leg, q in self.rest.items()}
         self.height = robot.foot_radius - self.lying_foot_z()
         self.reach = self.params.stance_reach
@@ -124,12 +130,15 @@ class TripodGait:
     # -- public API ----------------------------------------------------------------
 
     def set_command(self, vx: float, vy: float, wz: float) -> None:
-        self.cmd = np.array([vx, vy, wz], dtype=float)
+        self.cmd = (np.array([vx, vy, wz], dtype=float) if self.mode is Mode.STANDING
+                    else np.zeros(3))
 
     def stand_up(self) -> tuple[bool, str]:
         if self.mode is not Mode.LYING:
             return False, f"cannot stand up while {self.mode.value}"
         p = self.params
+        self.cmd[:] = 0
+        self.reach = p.rise_reach
         z0 = self.lying_foot_z()
         tuck = {leg: self.robot.solve(leg, self.neutral(leg, p.rise_reach, z0))[0] for leg in self.robot.legs}
         self.segments = [_Segment(p.tuck_time, joints=tuck),
@@ -159,7 +168,12 @@ class TripodGait:
             return dict(self.q)
 
         widening = self.mode is Mode.WIDENING
-        self.reach = p.rise_reach if widening else p.stance_reach
+        if widening:
+            self.reach = p.rise_reach
+        elif self.walking or np.any(np.abs(self.cmd) > 1e-6):
+            self.reach = p.stance_reach
+        # At zero velocity after rising, keep the planted feet at rise_reach.
+        # Changing it here used to trigger a complete stepping cycle on its own.
         dh = max(-p.max_height_rate * dt, min(p.max_height_rate * dt, p.body_height - self.height))
         self.height += dh
         cmd = np.zeros(3) if widening else self._limit(self.cmd)

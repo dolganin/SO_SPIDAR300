@@ -49,8 +49,8 @@ The simulation starts with the spider lying on its belly, legs spread straight o
 URDF zero pose and the position controllers fold the legs into `rest_pose` while it falls.
 
 - `stand_up`: legs tuck in until the feet hover just above the ground at `rise_reach`,
-  the feet press straight down until the body is at `body_height`, then the gait steps
-  the feet in to `stance_reach`.
+  the feet press straight down until the body is at `body_height`, then hold the
+  wide support. Only a walking command steps the feet in to `stance_reach`.
 - `lie_down`: the gait steps the feet out to `rise_reach`, the body lowers onto the
   ground, the legs spread back to `rest_pose`.
 
@@ -117,3 +117,32 @@ commands -> lie down -> stand up again, with travel, height, tilt and stance-foo
 `legs.yaml`, `links.yaml` and the renamed meshes. It overwrites hand edits in `legs.yaml`.
 Leg `lr` (CAD leg 1) has a ~8 mm deviation in the CAD femur/tibia placement; it uses the
 reference leg's femur and tibia parts so its mesh matches the shared kinematic chain.
+
+## Inspect stand-up separately in Gazebo
+
+Stop the real robot bridge and keyboard teleop before testing, or use a separate
+ROS domain in every simulation terminal. On the Jazzy laptop:
+
+```bash
+source /opt/ros/jazzy/setup.bash
+cd /workspace/code/SO_SPIDAR300/spidar300/sim/ros2_ws
+colcon build --symlink-install
+source install/setup.bash
+export ROS_DOMAIN_ID=42
+ros2 launch spider_bringup sim.launch.py
+```
+
+In a second terminal:
+
+```bash
+source /opt/ros/jazzy/setup.bash
+source /workspace/code/SO_SPIDAR300/spidar300/sim/ros2_ws/install/setup.bash
+export ROS_DOMAIN_ID=42
+ros2 service call /stand_up std_srvs/srv/Trigger '{}'
+```
+
+With no velocity publisher, stand-up should finish without starting a stepping
+cycle. To lower: `ros2 service call /lie_down std_srvs/srv/Trigger '{}'`.
+Use `ros2 run spider_gait keyboard_teleop` in that same domain for walking tests.
+The simulated model uses geometric joint zeros; physical motor signs and coxa
+yaw alignment still need separate verification on the robot.
