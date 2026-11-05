@@ -4,7 +4,6 @@ servos: servos.yaml
 
 bus:
   port: /dev/ttyACM0          # Waveshare / Feetech bus servo driver board over USB
-  baudrate: 1000000
   reads_per_tick: 3           # servo positions read per control tick (round robin)
   goal_speed: 2000            # ticks/s sent with every goal (as in spider_control.py); 0 = servo maximum
 
@@ -15,7 +14,7 @@ udp:
 rate: 50.0                    # control loop, Hz
 state_rate: 10.0              # state sent to the laptop, Hz
 cmd_timeout: 0.5              # s without a velocity command -> stop
-startup_velocity: 0.8         # rad/s: configured default, then lifting legs
+startup_velocity: 0.8         # rad/s: IK leg lift after original Spider default
 startup_timeout: 20.0         # per startup move; timeout blocks walking
 shutdown_timeout: 12.0        # s allowed to lie down before torque goes off
 

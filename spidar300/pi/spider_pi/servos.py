@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import yaml
 
-from .sts import TICKS_PER_TURN
+TICKS_PER_TURN = 4096
 
 TICKS_PER_RAD = TICKS_PER_TURN / (2 * math.pi)
 
@@ -72,8 +72,7 @@ HEADER = """\
 # Joint zero and positive direction are defined in spider_description/config/legs.yaml.
 # Ids: <side><leg><joint>, side 1 = left, 2 = right; leg 1 = front, 2 = middle, 3 = rear;
 # joint 1 = coxa, 2 = femur, 3 = tibia (numbering from numerate_motors.ipynb).
-# `python3 -m spider_pi.calibrate zero` writes each servo's EEPROM offset so the zero pose
-# reads 2048 (as in leg_twister.ipynb); `zero` stays 2048 then. Check `sign` with `... jog`.
+# Runtime zero coordinates come from spider_control.Spider._default_positions.
 """
 
 
@@ -102,10 +101,9 @@ class FakeBus:
             if self.torque_on.get(i):
                 self.pos[i] = p
 
-    def center_here(self, servo_id: int) -> int:
-        offset = self.pos[servo_id] - 2048
-        self.pos[servo_id] = 2048
-        return offset
+    def default(self):
+        self.torque(list(self.pos), True)
+        self.move({i: (p, 2000) for i, p in self.default_positions.items()})
 
     def close(self) -> None:
         pass

@@ -44,6 +44,11 @@ class Robot:
         self.hexapod = Hexapod.load(cfg["legs"])
         self.names = self.hexapod.joint_names
         self.servos = ServoMap(cfg["servos"], self.names)
+        if hasattr(bus, "default_positions"):
+            for c in self.servos.cal:
+                c.zero = bus.default_positions[c.id]
+        else:
+            bus.default_positions = {c.id: c.zero for c in self.servos.cal}
         params = GaitParams(**{k: float(v) for k, v in cfg.get("gait", {}).items()})
         self.gait = TripodGait(self.hexapod, params)
         self.limiter = JointRateLimiter(float(cfg["startup_velocity"]))
@@ -96,14 +101,12 @@ class Robot:
             goals = self.servos.to_ticks(np.tile(self.hexapod.rest_pose, len(self.hexapod.legs)))
             if any(t < 0 or t > 4095 for t in goals):
                 return False, "lying pose outside encoder range; check zero/sign"
-            # Set present positions as goals before enabling torque: no stale-goal jump.
-            self.bus.move({i: (ticks[i], int(self.cfg["bus"]["goal_speed"])) for i in self.servos.ids})
-            self.bus.torque(self.servos.ids, True)
+            self.bus.default()
             self.started = True
             self.limiter.last = measured.copy()
             self.startup = "moving_default"
             self.startup_deadline = time.monotonic() + float(self.cfg.get("startup_timeout", 20.0))
-            return True, "moving to configured default (geometric zero)"
+            return True, "Spider.move_to_default_position(speed=2000, acc=0); waiting for arrival"
         if self.startup == "waiting_floor":
             self.startup = "ready"
             self.starting = False
@@ -188,13 +191,16 @@ class Robot:
         else:
             q = self.gait.step(dt)
             target = np.concatenate([q[leg] for leg in self.hexapod.legs])
-        self.q, self.v = self.limiter(np.clip(target, self.lo, self.hi), dt)
-        ticks = self.servos.to_ticks(self.q)
-        # Fixed goal speed, as in spider_control.py: the rate limiter above already moves the goal
-        # smoothly every tick, and a speed tied to the joint velocity left lagging servos creeping
-        # towards their last goal at the minimum speed long after the motion had ended.
         speed = int(self.cfg["bus"].get("goal_speed", 2000))
-        self.bus.move({i: (t, speed) for i, t in zip(self.servos.ids, ticks)})
+        if self.startup == "moving_default":
+            # The original Spider already sent the default once. Do not replace
+            # its goals with a second trajectory or resend them every tick.
+            self.q = target.copy()
+            self.v = np.zeros_like(target)
+        else:
+            self.q, self.v = self.limiter(np.clip(target, self.lo, self.hi), dt)
+            ticks = self.servos.to_ticks(self.q)
+            self.bus.move({i: (t, speed) for i, t in zip(self.servos.ids, ticks)})
         if self.startup in ("moving_default", "lifting_legs"):
             if time.monotonic() < self.next_startup_check:
                 return
@@ -205,9 +211,13 @@ class Robot:
                        and np.max(np.abs(self.q - target)) < 1e-3)
             if reached:
                 if self.startup == "moving_default":
+                    self.limiter.last = measured.copy()
+                    self.q = measured.copy()
+                    self.measured = measured.copy()
                     self.startup = "lifting_legs"
                     self.startup_deadline = time.monotonic() + float(self.cfg.get("startup_timeout", 20.0))
-                    log.info("default reached; lifting legs into lying pose")
+                    log.info("Spider default reached; lifting legs from measured pose into lying pose")
+                    return
                 else:
                     self.startup = "waiting_floor"
                     log.info("lying pose reached; holding. Place belly-down on the floor, then press Enter.")
@@ -294,8 +304,8 @@ def main(argv=None) -> None:
         ids = [c["id"] for c in yaml.safe_load(open(cfg["servos"]))["servos"].values()]
         bus = FakeBus(ids)
     else:
-        from .sts import StsBus
-        bus = StsBus(cfg["bus"]["port"], int(cfg["bus"]["baudrate"]))
+        from .spider_bus import SpiderBus
+        bus = SpiderBus(cfg["bus"]["port"])
 
     stop = {"flag": False}
     def on_signal(*_):

@@ -129,7 +129,7 @@ def prepare(robot, client, addr):
     assert call(client, addr, {"type": "approve"})["ok"]
 
 
-def test_startup_requires_both_approvals(setup):
+def test_startup_requires_all_approvals(setup):
     robot, bus, client, addr = setup
     initial = bus.pos.copy()
     time.sleep(0.15)
@@ -138,7 +138,6 @@ def test_startup_requires_both_approvals(setup):
     assert not any(bus.torque_on.values())
     assert not call(client, addr, {"type": "stand_up"})["ok"]
     assert call(client, addr, {"type": "approve"})["ok"]
-    assert not call(client, addr, {"type": "approve"})["ok"]
     deadline = time.monotonic() + 4
     while robot.startup != "waiting_floor" and time.monotonic() < deadline:
         time.sleep(0.02)
@@ -154,9 +153,9 @@ def test_startup_requires_both_approvals(setup):
 
 def test_startup_stalled_servo_blocks_walking(setup, caplog):
     robot, bus, client, addr = setup
-    assert call(client, addr, {"type": "approve"})["ok"]
     original_move = bus.move
     bus.move = lambda goals: None
+    assert call(client, addr, {"type": "approve"})["ok"]
     robot.startup_deadline = time.monotonic() - 1
     time.sleep(0.2)
     assert robot.startup == "fault"
@@ -165,3 +164,35 @@ def test_startup_stalled_servo_blocks_walking(setup, caplog):
     assert not call(client, addr, {"type": "stand_up"})["ok"]
     assert not call(client, addr, {"type": "approve"})["ok"]
     bus.move = original_move
+
+
+def test_default_automatically_continues_from_measured_pose():
+    cfg = load_config(CONFIG)
+    ids = [c["id"] for c in yaml.safe_load(open(cfg["servos"]))["servos"].values()]
+    bus = FakeBus(ids)
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        robot = Robot(cfg, bus, sock)
+        robot.start()
+        assert robot.approve_startup()[0]
+        # Real servos may finish a few ticks from the exact default. The first
+        # IK transition must start there, not at a previous startup reading.
+        for i in ids:
+            bus.pos[i] += 5
+        measured = robot.servos.to_angles(bus.pos)
+        sent = len(bus.goals)
+        robot.control(0.02)
+        assert robot.startup == "lifting_legs"
+        assert len(bus.goals) == sent, "do not overwrite original default goals"
+        np.testing.assert_allclose(robot.limiter.last, measured)
+        robot.control(0.02)
+        assert np.max(np.abs(robot.q - measured)) <= cfg["startup_velocity"] * 0.02 + 1e-9
+        assert robot.q[2] > measured[2], "leg lift starts automatically"
+        for _ in range(150):
+            robot.control(0.02)
+            # Avoid wall-clock sleeps: allow the feedback check each iteration.
+            robot.next_startup_check = 0
+        assert robot.startup == "waiting_floor"
+        assert robot.starting and all(bus.torque_on.values())
+        assert robot.approve_startup()[0]
+        assert robot.startup == "ready"
+        assert robot.gait.stand_up()[0]
