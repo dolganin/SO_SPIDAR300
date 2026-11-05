@@ -2,10 +2,12 @@
 
   python3 -m spider_pi.calibrate scan                 list servo ids on the bus
   python3 -m spider_pi.calibrate set-id OLD NEW       renumber (only that servo connected)
-  python3 -m spider_pi.calibrate zero [JOINT...]      torque off, pose by hand, write EEPROM offsets
+  python3 -m spider_pi.calibrate zero [JOINT...]      legacy manual EEPROM calibration; not used at startup
   python3 -m spider_pi.calibrate read                 live joint angles from the encoders
   python3 -m spider_pi.calibrate jog JOINT [DELTA]    turn one joint by DELTA rad (sign = direction) and hold
   python3 -m spider_pi.calibrate jog JOINT --to DEG   turn one joint to an angle and hold
+  python3 -m spider_pi.calibrate record [JOINT...]    explicitly replace configured zeros with current readings
+  python3 -m spider_pi.calibrate default             move to configured default after Enter, hold; no EEPROM writes
   python3 -m spider_pi.calibrate release [JOINT...]   torque off (all 18 by default)
 
 Zero pose (legs.yaml): every coxa points straight out from the body, every femur is
@@ -159,6 +161,53 @@ def cmd_jog(cfg, args) -> None:
               f"set sign: {-cal.sign} for {args.joint} in servos.yaml")
 
 
+def cmd_record(cfg, args) -> None:
+    """Take the pose the servos hold right now as the zero pose: present ticks -> servos.yaml. No EEPROM writes."""
+    names = Hexapod.load(cfg["legs"]).joint_names
+    servos = ServoMap(cfg["servos"], names)
+    joints = args.joints or names
+    unknown = [j for j in joints if j not in names]
+    if unknown:
+        raise SystemExit(f"unknown joints {unknown}")
+    cal = [servos.cal[servos.index(j)] for j in joints]
+    ticks = open_bus(cfg).positions([c.id for c in cal])
+    missing = [f"{c.joint} ({c.id})" for c in cal if c.id not in ticks]
+    if missing:
+        raise SystemExit(f"no answer from {missing}; nothing saved")
+    for c in cal:
+        print(f"  {c.joint:14s} id {c.id:3d}  zero {ticks[c.id]:4d}  (was {c.zero})")
+    servos.save_zeros({c.joint: ticks[c.id] for c in cal})
+    print(f"saved to {servos.path}; torque left as it was")
+
+
+DEFAULT_SPEED = 0.4         # rad/s
+DEFAULT_TOLERANCE = 15      # ticks: "arrived" while moving into the zero pose
+
+
+def cmd_default(cfg, args) -> None:
+    """Move to the configured default and hold; never rewrite encoder offsets."""
+    hexapod = Hexapod.load(cfg["legs"])
+    servos = ServoMap(cfg["servos"], hexapod.joint_names)
+    bus = open_bus(cfg)
+    try:
+        input("Place belly on a high support with feet clear. Enter = move to configured default: ")
+        if failed := bus.hold_here(servos.ids):
+            raise SystemExit(f"could not hold servos {failed}")
+        bus.move({c.id: (c.zero, int(DEFAULT_SPEED * TICKS_PER_RAD)) for c in servos.cal})
+        deadline = time.monotonic() + math.pi / DEFAULT_SPEED + 2
+        while time.monotonic() < deadline:
+            ticks = bus.positions(servos.ids)
+            if all(c.id in ticks and abs(ticks[c.id] - c.zero) <= DEFAULT_TOLERANCE for c in servos.cal):
+                print("configured default reached; holding. EEPROM and calibration unchanged")
+                return
+            time.sleep(0.1)
+        present = bus.positions(servos.ids)
+        bus.move({i: (t, int(DEFAULT_SPEED * TICKS_PER_RAD)) for i, t in present.items()})
+        raise SystemExit("default move timed out; holding present positions")
+    finally:
+        bus.close()
+
+
 def cmd_release(cfg, args) -> None:
     names = Hexapod.load(cfg["legs"]).joint_names
     servos = ServoMap(cfg["servos"], names)
@@ -187,12 +236,15 @@ def main(argv=None) -> None:
     p.add_argument("joint")
     p.add_argument("delta", type=float, nargs="?", default=0.3, help="rad, sign = direction (default 0.3)")
     p.add_argument("--to", type=float, help="go to this angle in degrees instead (e.g. --to 0)")
+    p = sub.add_parser("record")
+    p.add_argument("joints", nargs="*", help="only these joints (default: all 18)")
+    sub.add_parser("default")
     p = sub.add_parser("release")
     p.add_argument("joints", nargs="*", help="only these joints (default: all 18)")
     args = parser.parse_args(argv)
     cfg = load_config(args.config.resolve())
     {"scan": cmd_scan, "set-id": cmd_set_id, "zero": cmd_zero, "read": cmd_read, "jog": cmd_jog,
-     "release": cmd_release}[args.cmd](cfg, args)
+     "record": cmd_record, "default": cmd_default, "release": cmd_release}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":

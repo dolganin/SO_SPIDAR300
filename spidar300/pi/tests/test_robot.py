@@ -26,7 +26,8 @@ def setup():
     client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     client.settimeout(1.0)
     ids = [c["id"] for c in yaml.safe_load(open(cfg["servos"]))["servos"].values()]
-    bus = FakeBus(ids, start={i: 2048 + 300 for i in ids})     # not in rest pose at power-up
+    zeros = {c["id"]: c["zero"] for c in yaml.safe_load(open(cfg["servos"]))["servos"].values()}
+    bus = FakeBus(ids, start={i: zeros[i] + 100 for i in ids})     # not in rest pose at power-up
     robot = Robot(cfg, bus, server)
     stop = threading.Event()
     robot.start()
@@ -69,7 +70,7 @@ def wait_mode(robot, mode, seconds):
 def test_full_cycle(setup):
     robot, bus, client, addr = setup
     client.sendto(protocol.encode({"type": "cmd", "vx": 0, "vy": 0, "wz": 0}), addr)
-    time.sleep(1.0)
+    prepare(robot, client, addr)
     assert not robot.starting, "should reach the rest pose"
     servos = ServoMap(robot.cfg["servos"], robot.names)
     rest = np.tile(robot.hexapod.rest_pose, 6)
@@ -98,20 +99,67 @@ def test_full_cycle(setup):
 
 def test_goals_respect_limits_and_speed(setup):
     robot, bus, client, addr = setup
-    time.sleep(0.5)
+    prepare(robot, client, addr)
     servos = ServoMap(robot.cfg["servos"], robot.names)
     for goals in bus.goals:
+        assert all(0 <= p <= 4095 for p, _ in goals.values())
         ticks = {i: p for i, (p, _) in goals.items()}
         q = servos.to_angles(ticks)
         assert np.all(q >= robot.lo - 1e-3) and np.all(q <= robot.hi + 1e-3)
-        assert all(s > 0 for _, s in goals.values())     # 0 would mean "full speed" on STS
+        assert all(s == robot.cfg["bus"]["goal_speed"] for _, s in goals.values())
 
 
 def test_shutdown_lies_down_and_releases_torque(setup):
     robot, bus, client, addr = setup
-    time.sleep(1.0)
+    prepare(robot, client, addr)
     call(client, addr, {"type": "stand_up"})
     assert wait_mode(robot, "standing", 3) == "standing"
     robot.stop()
     assert robot.gait.mode.value == "lying"
     assert not any(bus.torque_on.values())
+
+
+def prepare(robot, client, addr):
+    assert call(client, addr, {"type": "approve"})["ok"]
+    deadline = time.monotonic() + 4
+    while robot.startup != "waiting_floor" and time.monotonic() < deadline:
+        time.sleep(0.02)
+    assert robot.startup == "waiting_floor"
+    assert not call(client, addr, {"type": "stand_up"})["ok"]
+    assert call(client, addr, {"type": "approve"})["ok"]
+
+
+def test_startup_requires_both_approvals(setup):
+    robot, bus, client, addr = setup
+    initial = bus.pos.copy()
+    time.sleep(0.15)
+    assert robot.startup == "waiting_support"
+    assert bus.pos == initial and not bus.goals
+    assert not any(bus.torque_on.values())
+    assert not call(client, addr, {"type": "stand_up"})["ok"]
+    assert call(client, addr, {"type": "approve"})["ok"]
+    assert not call(client, addr, {"type": "approve"})["ok"]
+    deadline = time.monotonic() + 4
+    while robot.startup != "waiting_floor" and time.monotonic() < deadline:
+        time.sleep(0.02)
+    assert robot.startup == "waiting_floor"
+    assert all(bus.torque_on.values())
+    held = bus.pos.copy()
+    client.sendto(protocol.encode({"type": "cmd", "vx": 0.05}), addr)
+    time.sleep(0.15)
+    assert bus.pos == held and not robot.gait.cmd.any()
+    assert call(client, addr, {"type": "approve"})["ok"]
+    assert robot.startup == "ready" and not robot.gait.cmd.any()
+
+
+def test_startup_stalled_servo_blocks_walking(setup):
+    robot, bus, client, addr = setup
+    assert call(client, addr, {"type": "approve"})["ok"]
+    original_move = bus.move
+    bus.move = lambda goals: None
+    robot.startup_deadline = time.monotonic() - 1
+    time.sleep(0.2)
+    assert robot.startup == "fault"
+    assert not call(client, addr, {"type": "stand_up"})["ok"]
+    assert not call(client, addr, {"type": "approve"})["ok"]
+    bus.move = original_move

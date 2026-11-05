@@ -42,14 +42,17 @@ All commands from `pi/`. `--config` defaults to `pi/config.yaml`.
    ```bash
    python3 -m spider_pi.calibrate scan          # must list all 18: 111..133, 211..233
    ```
-2. **Zeros** — like `leg_twister.ipynb`: the current pose is written into each servo's
-   EEPROM offset (register 31) so that it reads 2048. This replaces offsets set earlier
-   from the notebooks. Torque goes off; hold the robot in the air in the zero pose: every
-   coxa straight out from the body, every femur horizontal, every tibia hanging vertically.
+2. **Configured default** — `servos.yaml` uses the tuned encoder positions from
+   `Spider._default_positions`: coxa 1500/2048/2500, femur 2048, tibia 700. These are
+   the geometric zero in `legs.yaml`; no manual positioning or EEPROM writes are
+   needed for startup. Existing servo EEPROM offsets must match those used when
+   these positions were tuned. Do not run the legacy `zero` / `record` commands
+   as part of startup: they replace this mapping.
+   To move only to default and hold (without the full startup sequence):
    ```bash
-   python3 -m spider_pi.calibrate zero                       # all 18
-   python3 -m spider_pi.calibrate zero leg_lf_femur leg_lf_tibia   # or a few at a time
+   python3 -m spider_pi.calibrate default
    ```
+   It waits for Enter before movement, checks arrival and leaves torque on.
 3. **Directions** — for each joint:
    ```bash
    python3 -m spider_pi.calibrate jog leg_lf_femur 0.3
@@ -66,8 +69,30 @@ On the Pi:
 ```bash
 python3 -m spider_pi.robot            # --fake: no servos, for a dry run
 ```
-At start it reads the servo positions and moves slowly (0.8 rad/s) into the rest pose:
-lying, legs spread out. **Put the robot on the ground on its belly first.**
+At startup the controller reads positions but sends no movement or torque-enable commands.
+The hardware preparation sequence is:
+
+1. Place the belly on a **high support**, with all feet free to move.
+2. Press **Enter in laptop keyboard_teleop** (ROS service `/approve_startup`, UDP
+   `{"type":"approve","id":1}`). The Pi holds the measured pose, enables torque
+   and moves slowly (0.8 rad/s) to the configured geometric zero.
+3. Once encoder feedback confirms arrival, it lifts the legs into `rest_pose`
+   (coxa=0, femur=0, tibia=1.5 rad). It checks arrival again and keeps holding.
+4. Wait for `lying pose reached; holding`, move the robot from the support to
+   the floor, belly down, then press **Enter again**.
+5. Only now are `t` (stand up), `b` (lie down) and velocity commands enabled.
+
+Velocity commands received during preparation are discarded. Each startup move
+has a 20 s timeout: failure freezes the measured pose and blocks walking until
+restart. Confirmations during a move are rejected. The preparation does not
+rewrite EEPROM or save a new calibration. Gazebo continues to start in rest_pose;
+these confirmations apply to the real robot only.
+
+Tibia direction is `sign: 1`: from the configured 700-tick zero, positive angles
+increase ticks (the 1.5 rad rest pose is approximately 1678 ticks). Verify this
+physical direction with `jog` on the support; the former `sign: -1` would produce
+an invalid negative encoder goal for this rest pose.
+
 Ctrl-C makes it lie down, then switches the torque off.
 
 On the laptop (`sim/ros2_ws` built and sourced):
@@ -75,7 +100,7 @@ On the laptop (`sim/ros2_ws` built and sourced):
 ros2 launch spider_bringup robot.launch.py pi_host:=raspberrypi.local   # or the Pi's IP
 ros2 run spider_gait keyboard_teleop                                   # second terminal
 ```
-`t` stand up, `b` lie down, walking keys as in simulation. RViz shows the measured pose.
+**Enter** confirms support placement, then floor placement; `t` stand up, `b` lie down, walking keys as in simulation. RViz shows the measured pose.
 Gait parameters live: `ros2 param set /pi_bridge period 0.6` (defaults in `config.yaml`;
 `ros2 param get` on the bridge shows its own defaults, not the Pi's values).
 

@@ -52,6 +52,7 @@ class PiBridge(Node):
         self.state_pub = self.create_publisher(JointState, "joint_states", 10)
         self.command_pub = self.create_publisher(JointState, "joint_command", 10)
         self.create_subscription(Twist, "cmd_vel", self._on_cmd, 10)
+        self.create_service(Trigger, "approve_startup", lambda req, res: self._request(res, {"type": "approve"}))
         self.create_service(Trigger, "stand_up", lambda req, res: self._request(res, {"type": "stand_up"}))
         self.create_service(Trigger, "lie_down", lambda req, res: self._request(res, {"type": "lie_down"}))
         self.create_timer(1.0 / rate, self._send_cmd)

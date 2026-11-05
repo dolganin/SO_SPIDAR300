@@ -64,6 +64,9 @@ class _PypiSmsSts:
     def unLockEprom(self, scs_id):
         return self.write1ByteTxRx(scs_id, 55, 0)
 
+    def read1ByteTxRx(self, scs_id, address):
+        return self._ph.read1ByteTxRx(self._port, scs_id, address)
+
 
 class StsBus:
     def __init__(self, port: str = "/dev/ttyACM0", baudrate: int = 1_000_000, acc: int = 0):
@@ -109,6 +112,26 @@ class StsBus:
     def torque(self, ids: list[int], enable: bool) -> None:
         for i in ids:
             self._request(self.sdk.write1ByteTxRx, i, ADDR_TORQUE_ENABLE, 1 if enable else 0)
+
+    def torque_checked(self, ids: list[int], enable: bool) -> list[int]:
+        """Set the torque and read it back (register 40), retrying; returns the servos that did not take it."""
+        want = 1 if enable else 0
+        failed = []
+        for i in ids:
+            for _ in range(EEPROM_RETRIES):
+                self._request(self.sdk.write1ByteTxRx, i, ADDR_TORQUE_ENABLE, want)
+                r = self._request(self.sdk.read1ByteTxRx, i, ADDR_TORQUE_ENABLE)
+                if r is not None and r[1] == COMM_SUCCESS and r[0] == want:
+                    break
+            else:
+                failed.append(i)
+        return failed
+
+    def hold_here(self, ids: list[int]) -> list[int]:
+        """Goal = present position, then torque on (no jump towards a stale goal). Returns failed servos."""
+        pos = self.positions(ids)
+        self.move({i: (p, 0) for i, p in pos.items()})
+        return [i for i in ids if i not in pos] + self.torque_checked(list(pos), True)
 
     def positions(self, ids: list[int]) -> dict[int, int]:
         """Present positions of the servos that answered."""

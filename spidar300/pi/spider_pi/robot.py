@@ -2,7 +2,8 @@
 
   python3 -m spider_pi.robot [--config config.yaml] [--fake]
 
-Starts by moving slowly from the measured pose into rest_pose (lying, legs spread).
+Starts waiting for support approval, moves to configured zero then rest_pose,
+and waits for floor approval. Startup does not write servo EEPROM.
 Without a velocity command for cmd_timeout the gait stops; on Ctrl-C / SIGTERM it
 lies down first, then switches the torque off.
 """
@@ -23,11 +24,10 @@ from spider_gait.gait import GaitParams, JointRateLimiter, Mode, TripodGait
 from spider_gait.kinematics import Hexapod
 
 from . import protocol
-from .servos import FakeBus, ServoMap
+from .servos import FakeBus, ServoMap, TICKS_PER_RAD
 
 log = logging.getLogger("spider_pi")
 _HERE = Path(__file__).resolve().parents[1]
-MIN_SPEED_TICKS = 30          # STS speed 0 means "maximum"; never send it
 
 
 def load_config(path: Path) -> dict:
@@ -47,7 +47,10 @@ class Robot:
         params = GaitParams(**{k: float(v) for k, v in cfg.get("gait", {}).items()})
         self.gait = TripodGait(self.hexapod, params)
         self.limiter = JointRateLimiter(float(cfg["startup_velocity"]))
-        self.starting = True          # slow first move into rest_pose
+        self.starting = True
+        self.startup = "waiting_support"
+        self.startup_deadline = None
+        self.next_startup_check = 0.0
         self.started = False
         self.client = None
         self.last_cmd = 0.0
@@ -58,6 +61,12 @@ class Robot:
         self.read_cursor = 0
         limits = [self.hexapod.limits[j] for _ in self.hexapod.legs for j in self.hexapod.joints]
         self.lo, self.hi = np.array([l for l, _ in limits]), np.array([h for _, h in limits])
+        # Intersect geometric limits with the encoder's single-turn range.
+        for i, c in enumerate(self.servos.cal):
+            ends = sorted(((0 - c.zero) / (c.sign * TICKS_PER_RAD),
+                           (4095 - c.zero) / (c.sign * TICKS_PER_RAD)))
+            self.lo[i] = max(self.lo[i], ends[0])
+            self.hi[i] = min(self.hi[i], ends[1])
         bad = self.servos.check_range(limits)
         if bad:
             log.warning("joint limits leave the 0..4095 servo range (check zero/sign): %s", bad)
@@ -75,14 +84,38 @@ class Robot:
             raise RuntimeError(f"could not read servo positions: {missing}")
         self.limiter.last = measured
         self.measured = measured
-        self.bus.torque(self.servos.ids, True)
-        self.started = True
-        log.info("torque on; moving into rest pose at %.1f rad/s", self.limiter.max_velocity)
+        self.q = measured.copy()
+        log.info("Place the robot belly-down on a high support, feet clear. Press Enter in keyboard_teleop.")
+
+    def approve_startup(self) -> tuple[bool, str]:
+        if self.startup == "waiting_support":
+            ticks = self.bus.positions(self.servos.ids)
+            measured = self.servos.to_angles(ticks)
+            if measured is None:
+                return False, "cannot read all servos; startup not approved"
+            goals = self.servos.to_ticks(np.tile(self.hexapod.rest_pose, len(self.hexapod.legs)))
+            if any(t < 0 or t > 4095 for t in goals):
+                return False, "lying pose outside encoder range; check zero/sign"
+            # Set present positions as goals before enabling torque: no stale-goal jump.
+            self.bus.move({i: (ticks[i], int(self.cfg["bus"]["goal_speed"])) for i in self.servos.ids})
+            self.bus.torque(self.servos.ids, True)
+            self.started = True
+            self.limiter.last = measured.copy()
+            self.startup = "moving_default"
+            self.startup_deadline = time.monotonic() + float(self.cfg.get("startup_timeout", 20.0))
+            return True, "moving to configured default (geometric zero)"
+        if self.startup == "waiting_floor":
+            self.startup = "ready"
+            self.starting = False
+            self.limiter.max_velocity = self.hexapod.max_velocity
+            self.gait.set_command(0, 0, 0)
+            return True, "floor placement confirmed; ready to stand up"
+        return False, f"cannot approve while {self.startup}"
 
     def stop(self) -> None:
         if not self.started:
             return
-        if self.gait.mode is not Mode.LYING:
+        if self.startup == "ready" and self.gait.mode is not Mode.LYING:
             log.info("lying down before torque off")
             deadline = time.monotonic() + float(self.cfg["shutdown_timeout"])
             period = 1.0 / float(self.cfg["rate"])
@@ -110,12 +143,18 @@ class Robot:
                 log.info("client %s:%d", *addr)
                 self.client = addr
             kind = msg["type"]
-            if kind == "cmd":
+            if kind == "approve":
+                ok, text = self.approve_startup()
+                log.info(text)
+                self.reply(msg, ok, text)
+            elif kind == "cmd":
+                if self.starting:
+                    continue
                 self.gait.set_command(float(msg.get("vx", 0)), float(msg.get("vy", 0)), float(msg.get("wz", 0)))
                 self.last_cmd = now
             elif kind in ("stand_up", "lie_down"):
                 if self.starting:
-                    ok, text = False, "still moving into the rest pose"
+                    ok, text = False, f"startup not complete: {self.startup}"
                 else:
                     ok, text = self.gait.stand_up() if kind == "stand_up" else self.gait.lie_down()
                 log.info(text)
@@ -141,16 +180,42 @@ class Robot:
     # -- control ---------------------------------------------------------------------
 
     def control(self, dt: float) -> None:
-        q = self.gait.step(dt)
-        target = np.concatenate([q[leg] for leg in self.hexapod.legs])
+        if self.startup in ("waiting_support", "waiting_floor", "fault"):
+            return
+        if self.startup in ("moving_default", "lifting_legs"):
+            target = (np.zeros(len(self.names)) if self.startup == "moving_default"
+                      else np.tile(self.hexapod.rest_pose, len(self.hexapod.legs)))
+        else:
+            q = self.gait.step(dt)
+            target = np.concatenate([q[leg] for leg in self.hexapod.legs])
         self.q, self.v = self.limiter(np.clip(target, self.lo, self.hi), dt)
-        if self.starting and np.abs(self.q - target).max() < 1e-3:
-            self.starting = False
-            self.limiter.max_velocity = self.hexapod.max_velocity
-            log.info("in rest pose; ready")
         ticks = self.servos.to_ticks(self.q)
-        speeds = [max(MIN_SPEED_TICKS, int(s * 1.3)) for s in self.servos.speeds(self.v)]
-        self.bus.move(dict(zip(self.servos.ids, zip(ticks, speeds))))
+        # Fixed goal speed, as in spider_control.py: the rate limiter above already moves the goal
+        # smoothly every tick, and a speed tied to the joint velocity left lagging servos creeping
+        # towards their last goal at the minimum speed long after the motion had ended.
+        speed = int(self.cfg["bus"].get("goal_speed", 2000))
+        self.bus.move({i: (t, speed) for i, t in zip(self.servos.ids, ticks)})
+        if self.startup in ("moving_default", "lifting_legs"):
+            if time.monotonic() < self.next_startup_check:
+                return
+            self.next_startup_check = time.monotonic() + 0.1
+            measured = self.servos.to_angles(self.bus.positions(self.servos.ids))
+            reached = (measured is not None and np.max(np.abs(measured - target)) < 0.025
+                       and np.max(np.abs(self.q - target)) < 1e-3)
+            if reached:
+                if self.startup == "moving_default":
+                    self.startup = "lifting_legs"
+                    self.startup_deadline = time.monotonic() + float(self.cfg.get("startup_timeout", 20.0))
+                    log.info("default reached; lifting legs into lying pose")
+                else:
+                    self.startup = "waiting_floor"
+                    log.info("lying pose reached; holding. Place belly-down on the floor, then press Enter.")
+            elif time.monotonic() > self.startup_deadline:
+                # Freeze at measured positions; never authorize walking after a failed move.
+                present = self.bus.positions(self.servos.ids)
+                self.bus.move({i: (p, speed) for i, p in present.items()})
+                self.startup = "fault"
+                log.error("startup move timed out; holding, walking blocked; restart after inspection")
 
     def read_some(self) -> None:
         """Read a few servos per tick (round robin) so the bus never stalls the 50 Hz loop."""
@@ -164,7 +229,7 @@ class Robot:
             self.measured = measured
 
     def publish_state(self) -> None:
-        self.send({"type": "state", "mode": self.gait.mode.value, "names": self.names,
+        self.send({"type": "state", "mode": self.gait.mode.value if not self.starting else self.startup, "names": self.names,
                    "position": [round(float(x), 4) for x in (self.measured if self.measured is not None else self.q)],
                    "command": [round(float(x), 4) for x in self.q]})
 
@@ -183,9 +248,10 @@ class Robot:
                 log.info("no velocity command for %.1f s: stopping", timeout)
             self.control(min(0.1, now - last_t) if tick else period)
             last_t = now
-            if self.gait.mode is not mode:
-                mode = self.gait.mode
-                log.info("mode: %s", mode.value)
+            current_mode = self.startup if self.starting else self.gait.mode.value
+            if current_mode != mode:
+                mode = current_mode
+                log.info("mode: %s", mode)
             self.read_some()
             tick += 1
             if tick % state_every == 0:

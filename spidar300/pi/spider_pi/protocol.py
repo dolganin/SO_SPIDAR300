@@ -2,7 +2,7 @@
 
 laptop -> pi
   {"type": "cmd", "vx": .., "vy": .., "wz": ..}          velocity, resend >= 1/cmd_timeout Hz
-  {"type": "stand_up" | "lie_down", "id": n}            answered with "reply"
+  {"type": "approve" | "stand_up" | "lie_down", "id": n}            answered with "reply"
   {"type": "set", "id": n, "params": {"period": 0.6}}   gait parameters, answered with "reply"
 pi -> laptop (to the last sender)
   {"type": "reply", "id": n, "ok": bool, "message": ".."}

@@ -8,6 +8,8 @@ class StubSdk:
     def __init__(self, raw):
         self.raw = dict(raw)                 # encoder before offset
         self.offset = {i: 0 for i in raw}
+        self.torque = {i: 0 for i in raw}
+        self.goal = {i: None for i in raw}
         self.locked = {i: True for i in raw}
         self.synced = []
         self.packets = []
@@ -37,14 +39,21 @@ class StubSdk:
 
     def SyncWritePosEx(self, i, pos, speed, acc):
         self.synced.append((i, pos, speed, acc))
+        self.goal[i] = pos
         return True
 
     def write1ByteTxRx(self, i, addr, value):
+        if addr == sts.ADDR_TORQUE_ENABLE:
+            self.torque[i] = value
         return 0, 0
+
+    def read1ByteTxRx(self, i, addr):
+        return (self.torque[i] if addr == sts.ADDR_TORQUE_ENABLE else 0), 0, 0
 
     def write2ByteTxRx(self, i, addr, value):
         assert not self.locked[i], "EEPROM must be unlocked"
         if addr == sts.ADDR_OFFSET:
+            assert not self.torque[i], "offset written while the servo holds torque"
             self.offset[i] = -(value & 0x7FF) if value & (1 << 11) else value
         return 0, 0
 
@@ -120,3 +129,51 @@ def test_garbled_read_is_retried_not_fatal():
     bus.center_here(111)
     assert bus.positions([111]) == {111: 2048}
     assert bus.stats["garbled"] == 1
+
+
+def test_hold_here_sets_goal_before_torque():
+    bus = bus_with({111: 1234})
+    assert bus.hold_here([111]) == []
+    assert bus.sdk.goal[111] == 1234 and bus.sdk.torque[111] == 1
+
+
+def test_torque_checked_reports_servos_that_ignore_it():
+    bus = bus_with({111: 0, 112: 0})
+    real = bus.sdk.write1ByteTxRx
+    bus.sdk.write1ByteTxRx = lambda i, a, v: (0, 0) if i == 112 else real(i, a, v)
+    assert bus.torque_checked([111, 112], True) == [112]
+
+
+def test_calibrate_default_end_to_end(tmp_path, monkeypatch):
+    import shutil
+    import yaml
+    from spider_pi import calibrate
+    from spider_pi.robot import load_config
+
+    here = __import__("pathlib").Path(__file__).resolve().parents[1]
+    cfg_path = tmp_path / "config.yaml"
+    cfg = yaml.safe_load(open(here / "config.yaml"))
+    cfg["legs"] = str((here / cfg["legs"]).resolve())
+    shutil.copy(here / "servos.yaml", tmp_path / "servos.yaml")
+    cfg_path.write_text(yaml.safe_dump(cfg))
+    cfg = load_config(cfg_path)
+
+    ids = [c["id"] for c in yaml.safe_load(open(tmp_path / "servos.yaml"))["servos"].values()]
+    bus = bus_with({i: 900 + 37 * k for k, i in enumerate(ids)})
+    sdk = bus.sdk
+    real_sync = sdk.SyncWritePosEx
+
+    def sync_and_move(i, pos, speed, acc):          # a holding servo reaches its goal at once
+        real_sync(i, pos, speed, acc)
+        if sdk.torque[i]:
+            sdk.raw[i] = (pos + sdk.offset[i]) % 4096
+        return True
+
+    sdk.SyncWritePosEx = sync_and_move
+    monkeypatch.setattr(bus, "close", lambda: None)
+    monkeypatch.setattr(calibrate, "open_bus", lambda cfg: bus)
+    monkeypatch.setattr("builtins.input", lambda *a: "")
+    calibrate.cmd_default(cfg, None)
+    assert bus.positions(ids) == {c["id"]: c["zero"] for c in yaml.safe_load(open(tmp_path / "servos.yaml"))["servos"].values()}
+    assert all(offset == 0 for offset in sdk.offset.values())
+    assert all(sdk.torque[i] == 1 for i in ids)

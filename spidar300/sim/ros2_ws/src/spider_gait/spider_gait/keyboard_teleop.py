@@ -26,6 +26,7 @@ HELP = """
 
   i / ,  forward / back      j / l  turn left / right     k / space  stop
   J / L  step left / right   u o m .  arcs                U O M >  diagonals
+  Enter  approve support / floor placement (real robot)
   t  stand up    b  lie down    q / z  faster / slower    Ctrl-C  quit
 """
 
@@ -51,7 +52,9 @@ class KeyboardTeleop(Node):
         self.hold_timeout = self.declare_parameter("hold_timeout", 0.6).value
         self.pub = self.create_publisher(Twist, "cmd_vel", 10)
         self.shown = None                        # command on the status line; None = redraw
-        self.posture_clients = {"t": self.create_client(Trigger, "stand_up"),
+        self.posture_clients = {"\r": self.create_client(Trigger, "approve_startup"),
+                                "\n": self.create_client(Trigger, "approve_startup"),
+                                "t": self.create_client(Trigger, "stand_up"),
                          "b": self.create_client(Trigger, "lie_down")}
 
     def call(self, key: str) -> None:
