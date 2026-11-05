@@ -152,7 +152,7 @@ def test_startup_requires_both_approvals(setup):
     assert robot.startup == "ready" and not robot.gait.cmd.any()
 
 
-def test_startup_stalled_servo_blocks_walking(setup):
+def test_startup_stalled_servo_blocks_walking(setup, caplog):
     robot, bus, client, addr = setup
     assert call(client, addr, {"type": "approve"})["ok"]
     original_move = bus.move
@@ -160,6 +160,8 @@ def test_startup_stalled_servo_blocks_walking(setup):
     robot.startup_deadline = time.monotonic() - 1
     time.sleep(0.2)
     assert robot.startup == "fault"
+    assert "actual=" in caplog.text and "goal=" in caplog.text
+    assert "trajectory remaining" in caplog.text
     assert not call(client, addr, {"type": "stand_up"})["ok"]
     assert not call(client, addr, {"type": "approve"})["ok"]
     bus.move = original_move

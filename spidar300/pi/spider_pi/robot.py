@@ -199,7 +199,8 @@ class Robot:
             if time.monotonic() < self.next_startup_check:
                 return
             self.next_startup_check = time.monotonic() + 0.1
-            measured = self.servos.to_angles(self.bus.positions(self.servos.ids))
+            feedback = self.bus.positions(self.servos.ids)
+            measured = self.servos.to_angles(feedback)
             reached = (measured is not None and np.max(np.abs(measured - target)) < 0.025
                        and np.max(np.abs(self.q - target)) < 1e-3)
             if reached:
@@ -211,6 +212,17 @@ class Robot:
                     self.startup = "waiting_floor"
                     log.info("lying pose reached; holding. Place belly-down on the floor, then press Enter.")
             elif time.monotonic() > self.startup_deadline:
+                final_goals = self.servos.to_ticks(target)
+                for c, goal in zip(self.servos.cal, final_goals):
+                    actual = feedback.get(c.id)
+                    if actual is None:
+                        log.error("startup %s: %s id=%d goal=%d: no position reply",
+                                  self.startup, c.joint, c.id, goal)
+                    elif abs(actual - goal) >= 0.025 * TICKS_PER_RAD:
+                        log.error("startup %s: %s id=%d actual=%d goal=%d error=%+d ticks",
+                                  self.startup, c.joint, c.id, actual, goal, actual - goal)
+                log.error("startup commanded trajectory remaining: %.4f rad; bus stats: %s",
+                          float(np.max(np.abs(self.q - target))), getattr(self.bus, "stats", {}))
                 # Freeze at measured positions; never authorize walking after a failed move.
                 present = self.bus.positions(self.servos.ids)
                 self.bus.move({i: (p, speed) for i, p in present.items()})
