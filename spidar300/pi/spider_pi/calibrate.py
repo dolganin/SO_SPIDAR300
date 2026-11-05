@@ -3,6 +3,7 @@
   python3 -m spider_pi.calibrate scan                 list servo ids on the bus
   python3 -m spider_pi.calibrate set-id OLD NEW       renumber (only that servo connected)
   python3 -m spider_pi.calibrate zero [JOINT...]      legacy manual EEPROM calibration; not used at startup
+  python3 -m spider_pi.calibrate inspect              read servo goals, offsets, limits and status; no motion
   python3 -m spider_pi.calibrate read                 live joint angles from the encoders
   python3 -m spider_pi.calibrate jog JOINT [DELTA]    turn one joint by DELTA rad (sign = direction) and hold
   python3 -m spider_pi.calibrate jog JOINT --to DEG   turn one joint to an angle and hold
@@ -97,6 +98,23 @@ def read_table(hexapod: Hexapod, servos: ServoMap, ticks: dict[int, int]) -> lis
                 cells.append(f"{c.id:3d}    ---   no reply")
         lines.append(f"{leg} {LEG_TITLES[leg]:13s}" + "".join(f"{x:<24s}" for x in cells))
     return lines
+
+
+def cmd_inspect(cfg, args) -> None:
+    """Read register snapshots only: no torque, goal or EEPROM writes."""
+    servos = ServoMap(cfg["servos"], Hexapod.load(cfg["legs"]).joint_names)
+    bus = open_bus(cfg)
+    try:
+        print("Read-only snapshot; run with robot controller stopped.")
+        for c in servos.cal:
+            row = bus.diagnostics([c.id])[c.id]
+            offset = row["offset"]
+            if offset is not None:
+                row["offset"] = -(offset & 0x7ff) if offset & 0x800 else offset
+            print(f"{c.joint} id={c.id} configured_zero={c.zero} sign={c.sign}: "
+                  + " ".join(f"{k}={v}" for k, v in row.items()))
+    finally:
+        bus.close()
 
 
 def cmd_read(cfg, args) -> None:
@@ -232,6 +250,7 @@ def main(argv=None) -> None:
     p = sub.add_parser("zero")
     p.add_argument("joints", nargs="*", help="only these joints (default: all 18)")
     sub.add_parser("read")
+    sub.add_parser("inspect")
     p = sub.add_parser("jog")
     p.add_argument("joint")
     p.add_argument("delta", type=float, nargs="?", default=0.3, help="rad, sign = direction (default 0.3)")
@@ -244,7 +263,7 @@ def main(argv=None) -> None:
     args = parser.parse_args(argv)
     cfg = load_config(args.config.resolve())
     {"scan": cmd_scan, "set-id": cmd_set_id, "zero": cmd_zero, "read": cmd_read, "jog": cmd_jog,
-     "record": cmd_record, "default": cmd_default, "release": cmd_release}[args.cmd](cfg, args)
+     "record": cmd_record, "default": cmd_default, "inspect": cmd_inspect, "release": cmd_release}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":

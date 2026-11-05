@@ -53,6 +53,9 @@ class _PypiSmsSts:
     def write2ByteTxRx(self, scs_id, address, value):
         return self._ph.write2ByteTxRx(self._port, scs_id, address, value)
 
+    def read2ByteTxRx(self, scs_id, address):
+        return self._ph.read2ByteTxRx(self._port, scs_id, address)
+
     def SyncWritePosEx(self, scs_id, position, speed, acc):
         lo, hi = self._sdk.SCS_LOBYTE, self._sdk.SCS_HIBYTE
         position = self.scs_toscs(position, 15)
@@ -149,6 +152,23 @@ class StsBus:
             self.sdk.SyncWritePosEx(i, int(pos), int(speed), self.acc)
         self.sdk.groupSyncWrite.txPacket()
         self.sdk.groupSyncWrite.clearParam()
+
+    def diagnostics(self, ids: list[int]) -> dict[int, dict]:
+        """Read-only snapshot, including the goal actually stored in the servo."""
+        registers = {"min": (9, 2), "max": (11, 2), "offset": (31, 2),
+                     "mode": (33, 1), "torque": (40, 1), "goal": (42, 2),
+                     "position": (56, 2), "load_raw": (60, 2),
+                     "voltage_raw": (62, 1), "temperature": (63, 1),
+                     "status": (65, 1), "moving": (66, 1), "current_raw": (69, 2)}
+        out = {}
+        for i in ids:
+            row = {}
+            for name, (address, width) in registers.items():
+                fn = self.sdk.read1ByteTxRx if width == 1 else self.sdk.read2ByteTxRx
+                r = self._request(fn, i, address)
+                row[name] = r[0] if r is not None and r[1] == COMM_SUCCESS and r[2] == 0 else None
+            out[i] = row
+        return out
 
     # -- EEPROM ----------------------------------------------------------------------
 

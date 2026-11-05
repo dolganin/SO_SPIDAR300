@@ -177,3 +177,30 @@ def test_calibrate_default_end_to_end(tmp_path, monkeypatch):
     assert bus.positions(ids) == {c["id"]: c["zero"] for c in yaml.safe_load(open(tmp_path / "servos.yaml"))["servos"].values()}
     assert all(offset == 0 for offset in sdk.offset.values())
     assert all(sdk.torque[i] == 1 for i in ids)
+
+
+def test_diagnostics_reads_goals_and_configuration_without_writes():
+    bus = bus_with({113: 1911})
+    reads = []
+    values = {9: 0, 11: 4095, 31: 123, 42: 700, 56: 1911}
+    def read(i, address):
+        reads.append((i, address))
+        return values.get(address, 0), 0, 0
+    bus.sdk.read1ByteTxRx = read
+    bus.sdk.read2ByteTxRx = read
+    def no_write(*args):
+        raise AssertionError("diagnostics must not write")
+    bus.sdk.write1ByteTxRx = no_write
+    bus.sdk.write2ByteTxRx = no_write
+    bus.sdk.SyncWritePosEx = no_write
+    row = bus.diagnostics([113])[113]
+    assert row["goal"] == 700 and row["position"] == 1911
+    assert row["offset"] == 123 and row["max"] == 4095
+    assert (113, 42) in reads
+
+
+def test_diagnostics_does_not_present_failed_reads_as_values():
+    bus = bus_with({113: 1911})
+    bus.sdk.read1ByteTxRx = lambda *args: (999, -6, 0)
+    bus.sdk.read2ByteTxRx = lambda *args: (999, 0, 32)
+    assert all(value is None for value in bus.diagnostics([113])[113].values())
