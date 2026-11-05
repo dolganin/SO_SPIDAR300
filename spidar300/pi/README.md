@@ -82,3 +82,30 @@ python3 -m pytest tests
 
 Tests verify delegation to the original Spider and startup sequencing on a fake
 bus. They do not establish mechanical calibration or performance on hardware.
+
+## Replay the original notebooks without the runtime
+
+```bash
+cd /workspace/SO_SPIDAR300/spidar300/pi
+python -m spider_pi.notebook_replay --show
+python -m spider_pi.notebook_replay
+```
+
+The module executes source cells directly from `test_spider_control.ipynb`:
+construct `Spider()`, ping, enable torque, move to default with speed=2000,
+acc=0 and blocking=True, then disable torque. It waits for Enter before executing.
+No ROS, IK, runtime adapter or EEPROM calibration is involved. The first serial
+port is selected exactly as in the original notebook.
+
+For the direct SDK default cell from `leg_twister.ipynb` (speed=50, acc=10):
+
+```bash
+python -m spider_pi.notebook_replay leg-default
+```
+
+That original cell sends goals asynchronously and leaves torque enabled; module
+completion does not mean the servos reached their goals. The `left-tibia-test`
+recipe reproduces its separate test of IDs 113/123/133 at 1000, speed=300, acc=50.
+Offset-writing experiment cells are excluded. Errors propagate visibly; on an
+error or Ctrl-C during execution, the module requests torque off and closes the port.
+Stop all other programs using the servo port before replay.

@@ -76,3 +76,14 @@ def test_standalone_default_uses_original_blocking_wait():
     bus = SpiderBus("unused", spider=spider)
     bus.default(blocking=True)
     spider.move_to_default_position.assert_called_once_with(speed=2000, acc=0, blocking=True)
+
+
+def test_position_error_is_preserved_and_cleared_on_recovery():
+    spider = Mock()
+    spider._default_positions = {113: 700}
+    spider.position.side_effect = [IOError("Servo 113 returned error: 32"), 1911]
+    bus = SpiderBus("unused", spider=spider)
+    assert bus.positions([113]) == {}
+    assert bus.position_errors == {113: "Servo 113 returned error: 32"}
+    assert bus.positions([113]) == {113: 1911}
+    assert not bus.position_errors

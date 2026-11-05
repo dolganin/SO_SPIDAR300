@@ -226,8 +226,9 @@ class Robot:
                 for c, goal in zip(self.servos.cal, final_goals):
                     actual = feedback.get(c.id)
                     if actual is None:
-                        log.error("startup %s: %s id=%d goal=%d: no position reply",
-                                  self.startup, c.joint, c.id, goal)
+                        log.error("startup %s: %s id=%d goal=%d: %s",
+                                  self.startup, c.joint, c.id, goal,
+                                  getattr(self.bus, "position_errors", {}).get(c.id, "no position reply"))
                     elif abs(actual - goal) >= 0.025 * TICKS_PER_RAD:
                         log.error("startup %s: %s id=%d actual=%d goal=%d error=%+d ticks",
                                   self.startup, c.joint, c.id, actual, goal, actual - goal)
@@ -236,6 +237,10 @@ class Robot:
                 # Freeze at measured positions; never authorize walking after a failed move.
                 present = self.bus.positions(self.servos.ids)
                 self.bus.move({i: (p, speed) for i, p in present.items()})
+                unreadable = [i for i in self.servos.ids if i not in present]
+                if unreadable:
+                    self.bus.torque(unreadable, False)
+                    log.error("torque off for unreadable servos %s; cannot hold an unknown position", unreadable)
                 self.startup = "fault"
                 log.error("startup move timed out; holding, walking blocked; restart after inspection")
 

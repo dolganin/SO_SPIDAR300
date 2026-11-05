@@ -18,6 +18,7 @@ class SpiderBus:
     def __init__(self, port, spider=None):
         self.spider = spider if spider is not None else open_spider(port)
         self.default_positions = dict(self.spider._default_positions)
+        self.position_errors = {}
 
     def close(self):
         self.spider._port_handler.closePort()
@@ -34,8 +35,9 @@ class SpiderBus:
         for i in ids:
             try:
                 out[i] = self.spider.position(i)
-            except IOError:
-                pass
+                self.position_errors.pop(i, None)
+            except IOError as exc:
+                self.position_errors[i] = str(exc)
         return out
 
     def torque(self, ids, enable):
